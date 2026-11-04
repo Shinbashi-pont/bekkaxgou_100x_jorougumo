@@ -1,0 +1,1915 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="description" content="別架シリーズ 推理アドベンチャー"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>女郎蜘蛛</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one-screen ADV. header bar / scene plate (canvas) / stage (text box or panels). Single light look: an old downtown tailor's shop; paper is pattern paper, the text box is the attic at night, the accent is the gold-tinged silk thread. */
+:root{
+  --paper:#E4DED2;
+  --panel:#F2EEE5;
+  --ink:#241E1A;
+  --mute:#6A6158;
+  --line:#C2B8A6;
+  --shade:#2A2430;
+  --on-shade:#EEE8DE;
+  --sun:#8C5A24;
+  --sun-soft:#F0E1C6;
+  --bad:#A2382B;
+  --serif:"Zen Old Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
+  --ui:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  color-scheme:light;
+}
+html,body{height:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--ui);font-size:15px;overflow:hidden}
+html{background:var(--paper)}
+#app{height:100%;max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:10px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px;box-sizing:border-box}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,label:focus-within{outline:2px solid var(--sun);outline-offset:2px}
+
+/* header */
+.bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.where{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.where .ch{font-size:11px;letter-spacing:.14em;color:var(--sun);font-weight:700}
+.where .pl{font-family:var(--serif);font-size:17px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.where .tm{font-family:var(--mono);font-size:12px;color:var(--mute)}
+.tools{display:flex;gap:6px}
+.tool{background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:6px 10px;font-size:13px}
+.tool:hover{border-color:var(--shade)}
+.tool[disabled]{opacity:.4;cursor:default}
+
+/* plate */
+.plate{position:relative;width:100%;aspect-ratio:16/5.4;max-height:28vh;border-radius:3px;overflow:hidden;background:#CFC4B0;flex:none}
+.plate canvas{width:100%;height:100%;display:block}
+
+/* stage */
+#stage{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;overflow-y:auto;padding-bottom:4px}
+.box{background:var(--shade);color:var(--on-shade);border-radius:3px;padding:16px 20px 22px;min-height:8.6em;position:relative;cursor:pointer;flex:none;
+  font-family:var(--serif);font-size:17px;line-height:1.9;user-select:none}
+.box .sp{font-family:var(--ui);font-size:12px;font-weight:700;letter-spacing:.12em;color:#E6BF84;margin-bottom:2px;min-height:1.2em}
+.box .tx{white-space:pre-wrap;word-break:break-word}
+.box .more{position:absolute;right:14px;bottom:8px;font-size:12px;color:#E6BF84;opacity:0}
+.box.ready .more{opacity:1;animation:blink 1.1s steps(2) infinite}
+@keyframes blink{50%{opacity:.15}}
+.box.static{cursor:default}
+
+.panel{display:flex;flex-direction:column;gap:8px;flex:none}
+.row{display:flex;align-items:center;gap:10px;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:12px 14px;font-size:15px}
+.row:hover:not([disabled]){border-color:var(--shade);background:#fff}
+.row[disabled]{opacity:.5;cursor:default}
+.row .mk{font-family:var(--mono);font-size:12px;color:var(--mute);width:2.2em;flex:none}
+.row.done .mk{color:var(--sun)}
+.row .lb{flex:1;min-width:0}
+.row .cost{font-family:var(--mono);font-size:12px;color:var(--mute)}
+.row.exit{background:var(--shade);color:var(--on-shade);border-color:var(--shade)}
+.row.exit .mk{color:#E6BF84}
+.row.exit:hover{background:#3A3242}
+.note{font-size:13px;color:var(--mute);line-height:1.6}
+.clock{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);font-size:13px;padding:2px 2px 0}
+.clock b{font-size:20px;color:var(--ink);font-weight:500}
+
+/* minigames */
+.mini{display:flex;flex-direction:column;gap:10px;flex:none}
+.mini .lead{font-family:var(--serif);font-size:15px;line-height:1.8;margin:0}
+.viewer{width:100%;aspect-ratio:16/7.2;background:#c9c8c2;border-radius:3px;overflow:hidden}
+.viewer canvas{width:100%;height:100%;display:block}
+.ctl{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.ctl button{background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:6px 10px;font-family:var(--mono);font-size:13px}
+.ctl input[type=range]{flex:1;min-width:120px;accent-color:var(--sun)}
+.fr{font-family:var(--mono);font-size:13px;color:var(--mute);min-width:6.5em;text-align:right}
+.btn{background:var(--shade);color:var(--on-shade);border:0;border-radius:3px;padding:11px 16px;font-size:15px;font-weight:500}
+.btn[disabled]{opacity:.35;cursor:default}
+.btn.sub{background:var(--panel);color:var(--ink);border:1px solid var(--line)}
+.measure{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+@media (max-width:560px){.measure{grid-template-columns:minmax(0,1fr)}}
+.tbl{font-family:var(--mono);font-size:12.5px;border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+.tbl th,.tbl td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:right}
+.tbl th{color:var(--mute);font-weight:400}
+.gwrap{background:var(--panel);border:1px solid var(--line);border-radius:3px;aspect-ratio:16/10}
+.gwrap canvas{width:100%;height:100%;display:block}
+.q{background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.q p{margin:0;font-family:var(--serif);font-size:15px;line-height:1.7}
+.q .fb{font-size:14px;color:var(--bad);min-height:1.2em}
+.q .fb.ok{color:var(--sun)}
+.opt{display:flex;gap:10px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:11px 12px;cursor:pointer;line-height:1.5}
+.opt input{margin-top:3px;accent-color:var(--sun)}
+.err{color:var(--bad);font-size:14px;min-height:1.2em;margin:0}
+.seg{display:flex;gap:0}
+.seg button{flex:1;background:var(--panel);border:1px solid var(--line);padding:9px;font-family:var(--mono);font-size:13px}
+.seg button+button{border-left:0}
+.seg button.on{background:var(--shade);color:var(--on-shade);border-color:var(--shade)}
+
+/* overlays */
+.ov{position:fixed;inset:0;background:rgba(27,31,41,.55);display:flex;align-items:center;justify-content:center;z-index:20;
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.sheet{background:var(--paper);border-radius:4px;width:100%;max-width:560px;max-height:100%;overflow:auto;padding:18px 18px 20px;box-sizing:border-box;display:flex;flex-direction:column;gap:12px}
+.sheet h2{margin:0;font-family:var(--serif);font-size:20px}
+.sheet .x{align-self:flex-end;background:none;border:1px solid var(--line);border-radius:3px;padding:4px 10px;font-size:13px}
+.ev{background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+.ev h3{margin:0;font-size:15px;display:flex;gap:8px;align-items:baseline}
+.ev h3 span{font-family:var(--mono);font-size:11px;color:var(--sun)}
+.ev p{margin:0;font-size:13.5px;line-height:1.65;color:#33404A}
+.ev .btn{align-self:flex-start;padding:7px 12px;font-size:13px;margin-top:4px}
+.empty{color:var(--mute);font-size:14px}
+.log p{margin:0 0 8px;font-family:var(--serif);font-size:14.5px;line-height:1.75}
+.log b{font-family:var(--ui);font-size:12px;color:var(--sun);margin-right:6px}
+.code{font-family:var(--mono);font-size:24px;letter-spacing:.06em;text-align:center;background:var(--panel);border:1px dashed var(--shade);border-radius:3px;padding:14px 8px;user-select:all;word-break:break-all}
+
+/* title */
+#title{position:fixed;inset:0;background:var(--paper);z-index:15;display:flex;align-items:center;justify-content:center;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px}
+[hidden]{display:none!important}
+.tin{width:100%;max-width:520px;display:flex;flex-direction:column;gap:16px}
+.logo{font-family:var(--serif);font-weight:700;font-size:clamp(46px,13.5vw,96px);line-height:1;margin:0;letter-spacing:.02em;color:var(--ink);display:flex;flex-wrap:nowrap}
+.logo span{display:inline-block;cursor:pointer;transform-origin:50% 0}
+.logo span.dangle{animation:dangle 3.2s cubic-bezier(.3,.1,.3,1)}
+@keyframes dangle{0%{transform:none}10%{transform:translateY(.42em) rotate(4deg)}30%{transform:translateY(.3em) rotate(-3deg)}55%{transform:translateY(.36em) rotate(1.5deg)}100%{transform:none}}
+.logo span.dangle::before{content:"";position:absolute}
+.kick .x{display:inline-block;position:relative}
+.kick .x.ravel{animation:ravel 1.1s ease-in forwards}
+@keyframes ravel{to{transform:translateY(.9em) rotate(25deg);opacity:0}}
+.kick .x.sewn{animation:sewn 1.2s steps(6) forwards;clip-path:inset(0 100% 0 0)}
+@keyframes sewn{to{clip-path:inset(0 0 0 0)}}
+.kick .x.sewn::after{content:"";position:absolute;left:0;right:0;bottom:-3px;border-bottom:1.5px dashed var(--sun)}
+.viewer.side{aspect-ratio:16/11;background:#EEE9DE}
+.viewer.tailor{aspect-ratio:16/10;background:#2A2E3E}
+.seg.times.five{grid-template-columns:repeat(5,minmax(0,1fr))}
+@media (max-width:560px){.seg.times.five{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.q.ledger{font-family:var(--serif);background:#F7F1E2}
+.q .ll{font-size:14px;line-height:1.6;letter-spacing:.02em}
+.tbl td.bad{color:var(--bad)} .tbl td.mute{color:var(--mute)} .tbl td.pend{color:var(--mute)} .tbl td.okc{color:var(--sun);font-weight:500}
+.tbl td:first-child,.tbl th:first-child{text-align:left}
+button.opt{width:100%;text-align:left;font-size:15px}
+.opt.on{border-color:var(--sun);background:#fff}
+.tl{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;counter-reset:tl}
+.tl li{display:flex;gap:10px;align-items:baseline;font-family:var(--serif);font-size:14.5px;line-height:1.5}
+.tl .tm{font-family:var(--mono);font-size:12.5px;color:var(--sun);min-width:5.2em;flex:none}
+.tl small{font-family:var(--ui);font-size:12px;color:var(--mute)}
+.seg.times{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+.seg.times button+button{border-left:1px solid var(--line)}
+.seg.times button.on{border-color:var(--shade)}
+.btn.live{background:var(--sun)}
+.tsub2{font-size:13px;color:var(--mute);margin:0}
+.kick{font-size:12px;letter-spacing:.24em;color:var(--sun);font-weight:700;margin:0}
+.tsub{font-family:var(--serif);font-size:15px;line-height:1.8;color:#33404A;margin:0}
+.tbtns{display:flex;flex-direction:column;gap:8px}
+.cont{display:flex;gap:8px;flex-wrap:wrap}
+.cont input{flex:1;min-width:0;font-family:var(--mono);font-size:16px;padding:10px 12px;border:1px solid var(--line);border-radius:3px;background:var(--panel);text-transform:uppercase;letter-spacing:.06em}
+.meta{font-family:var(--mono);font-size:12px;color:var(--mute)}
+.print{background:#FBFAF6;padding:8px 8px 4px;border-radius:2px;box-shadow:0 1px 3px rgba(27,31,41,.25);transform:rotate(-0.6deg)}
+.print .cap{margin:6px 2px 2px;font-family:var(--mono);font-size:11px;color:var(--mute)}
+.sheet .x.bottom{align-self:stretch;padding:11px;font-size:14px;background:var(--panel)}
+.linkbtn{background:none;border:0;padding:0;font:inherit;color:var(--sun);text-decoration:underline;text-underline-offset:3px}
+.vol{display:grid;grid-template-columns:5em minmax(0,1fr) 3em;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:12px 14px;font-size:14px}
+.vol input{width:100%;accent-color:var(--sun)}
+.vol .fr{min-width:0}
+#card{position:fixed;inset:0;z-index:18;background:var(--shade);color:var(--on-shade);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;text-align:center;padding:24px}
+#card .k{font-size:12px;letter-spacing:.3em;color:#E6BF84}
+#card .t{font-family:var(--serif);font-size:clamp(30px,8vw,46px);font-weight:700}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--ink);color:#fff;padding:10px 16px;border-radius:3px;font-size:14px;z-index:30;max-width:calc(100% - 32px);box-sizing:border-box}
+.end{display:flex;flex-direction:column;gap:12px;flex:none}
+.end .et{font-family:var(--serif);font-size:26px;font-weight:700;margin:0}
+.end .ek{font-size:12px;letter-spacing:.2em;color:var(--sun);font-weight:700;margin:0}
+@media (prefers-reduced-motion:reduce){.box.ready .more{animation:none}.logo span.dangle{animation:none}.kick .x.ravel,.kick .x.sewn{animation:none;clip-path:none;opacity:1;transform:none}}
+</style>
+
+<div id="app">
+  <div class="bar">
+    <div class="where"><span class="ch" id="hCh"></span><span class="pl" id="hPl"></span><span class="tm" id="hTm"></span></div>
+    <div class="tools">
+      <button class="tool" id="bNote">手帳</button>
+      <button class="tool" id="bLog">履歴</button>
+      <button class="tool" id="bSave">合言葉</button>
+      <button class="tool" id="bSnd" aria-label="音の設定">音</button>
+    </div>
+  </div>
+  <div class="plate"><canvas id="plate"></canvas></div>
+  <div id="stage"></div>
+</div>
+
+<div id="title">
+  <div class="tin">
+    <p class="kick" id="kick">別架X号　File No.100X</p>
+    <h1 class="logo" id="logo" aria-label="女郎蜘蛛"></h1>
+    <p class="tsub" id="tsub"></p>
+    <div class="tbtns">
+      <button class="btn" id="tNew">はじめから</button>
+      <div class="cont">
+        <input id="tCode" placeholder="合言葉 (15文字)" autocomplete="off" spellcheck="false" aria-label="合言葉">
+        <button class="btn sub" id="tCont">つづきから</button>
+      </div>
+      <p class="err" id="tErr"></p>
+    </div>
+    <p class="meta">推理アドベンチャー ・ 約60〜90分 ・ 画面か Enter で文章を送る ・ 音が出ます <button class="linkbtn" id="tSnd">音の設定</button></p>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ============================================================
+   シナリオ
+   行の書式:  名前：台詞 / 地の文 / !get 証拠ID / !set フラグ / !se 効果音 / ?フラグ 条件付きの行 / ?!フラグ 否定条件
+   ============================================================ */
+const SPEAKERS = ["鳴海","千鶴","正一","沖野","権藤","キヨ","田代","二階の人","律","客"];
+const FLAGS = ["h2","suit","box","oki","h3","kiyo","tashiro","gondo","win","spin"];
+const EVIDENCE = {
+  E1:{n:"縫いかけの背広",d:"柚木洋装店の二階、作業場の衣桁に掛かっている男物の背広。2月10日の夜から、誰もいないはずの夜中に足踏みミシンが動き、朝になると少しずつ縫い進んでいる。仮縫いの段階で、左の袖だけが右より一寸(約3センチ)短い。"},
+  E2:{n:"細い絹糸",d:"背広の縫い目に使われている糸。店の棚のどの糸とも違う、髪の毛ほどに細く、引っぱってもまず切れない絹糸。千鶴は、こんな糸を仕入れたことはないと言う。"},
+  E3:{n:"尋ね人の原稿の控え",d:"タエが十年間、ラジオの尋ね人に出し続けた原稿の控え。毎年少しずつ書き足されている。正一の生まれ年、出征の年、左の眉の上のほくろ、「そうだなあ」という口癖、算盤が得意なこと、魚の目玉が嫌いなこと。全国に放送された内容なので、聞いた人なら誰でも覚えられる。"},
+  E4:{n:"キヨの証言",d:"向かいの煙草屋の店番・キヨは、1月28日の夜十時ごろ、柚木洋装店の「二階の窓」に明かりがつき、糸を繰る女の影が動くのを見た。その時はタエが夜なべをしていると思った。キヨは一日じゅう、帳場に座って通りを見ている。"},
+  E5:{n:"田代巡査の検分",d:"1月29日の朝、千鶴が階段の下で倒れている母を見つけた。田代巡査の見立てでは、亡くなったのは前の晩の九時から十一時のあいだ。足を踏み外した事故として処理された。千鶴はその夜、洋裁学校の夜間部のあと、友人の家に泊まっていた。"},
+  E6:{n:"権藤の証言",d:"金貸しの権藤浩三は、1月28日の夜九時すぎに月賦の件で柚木洋装店を訪ね、九時半に出て碁会所へ行ったと話す。「十時に、キヨ婆さんが窓のタエさんを見ている。俺が帰ったあとも、タエさんは生きていた」。碁会所の席主も、権藤が九時四十分から朝まで打っていたと言う。"},
+  E7:{n:"窓の高さ",d:"煙草屋の帳場に座ったキヨの目の高さからは、洋装店の店先に張り出した看板の庇にさえぎられて、二階の窓は見えない。見えるのは、その上の屋根裏の窓だけ。継ぎ足しの建物なので、通りからは屋根裏の窓が二階の窓のように見える。"},
+  E8:{n:"千鶴の証言",d:"屋根裏には、祖母の代からの古い糸車がある。母のタエは糸車の使い方を知らず、「あれはうちの者には回せない」と笑っていた。千鶴も回したことがない。"},
+  E9:{n:"権藤の請求書",d:"権藤が千鶴に突きつけた請求書。三年前の店の改装費の貸付で、月賦は月四千円の三十回払い。二十五回目までを受け取り、残る五回分の二万円が未払いだと書いてある。受取の控えがあるなら出せ、と権藤は言う。"},
+  E10:{n:"店の帳簿",d:"タエがつけていた店の帳簿。月賦の欄は、去年の九月から空白になっている。タエは几帳面な人で、受取の控えは必ず帳簿に挟んでいたと千鶴は言うが、控えは一枚も見つからない。"},
+  E11:{n:"屋根裏の帳簿",d:"屋根裏の糸車のそばで見つかった、もう一冊の帳簿。タエのものではない、細く几帳面な筆跡。店の出入りが一円違わず写してあり、月賦は三十回目まで支払い済みで、権藤の受取の控えの番号まで書き写してある。最後の行は「一月二十八日 夜九時十分 権藤氏来ル」。"},
+  E12:{n:"採寸表",d:"足踏みミシンの引き出しの二重底に入っていた、タエの字の採寸表。日付は正一が出征する前の日。裄丈の欄に「左一寸詰メ(幼時骨折)」と書き添えてある。正一は子どものころ、左腕を折っていた。尋ね人の原稿には、一度も書かれていない。"},
+  E13:{n:"沖野の証言",d:"1月28日の夜、権藤に呼ばれて路地で待たされていた沖野は、九時二十五分ごろ、柚木洋装店から出てくる権藤を見た。権藤は、紙の束を外套の内側に押しこんでいた。"},
+  E14:{n:"替えボタン",d:"黒い角ボタンが一つ。出征の朝、タエが「帰ったら背広を仕立てる。そのボタンを付けるから、なくさずに持っていなさい」と正一に渡したもの。正一は遠い収容所で亡くなる前に、これを戦友の沖野に託した。"}
+};
+const EV_ORDER = ["E1","E2","E3","E4","E5","E6","E7","E8","E9","E10","E11","E12","E13","E14"];
+
+const N = {}; const ORDER = [];
+function def(id, o){ N[id]=o; ORDER.push(id); }
+
+/* ---------- 序章 ---------- */
+def("p1",{ch:"序章 女郎蜘蛛",place:"綾織町 煙草屋",time:"1月28日 21:58",plate:"street",s:`
+ラジオの尋ね人の時間は、とうに終わっている。今は古い流行り歌が、雑音まじりに流れていた。
+煙草屋の帳場は、店の奥の一段高いところにある。キヨは四十年、ここに座って通りを見てきた。
+誰が何時に出かけて、誰が何時に帰ってきたか。この路地のことなら、たいていはわかる。
+向かいは柚木洋装店。間口二間の、継ぎ足しを重ねた古い店だ。
+!se sew
+上のほうの窓に、明かりがついていた。
+障子に、女の影が映っている。片手を大きく回し、もう片方の手で、細いものを引き伸ばしている。
+キヨ：タエさん、まだ働いてるよ。
+キヨは独りごとを言って、火鉢に手をかざした。後家になって十年、タエは毎晩遅くまで針を持っている。
+影は、休みなく手を回し続けていた。糸を繰っているように見えた。
+キヨは、ラジオの音を少し大きくした。
+次の朝、タエは店の階段の下で、冷たくなって見つかった。`,next:"c1_0"});
+
+/* ---------- 第一章 ---------- */
+def("c1_0",{ch:"第一章 尋ね人",place:"鳴海探偵事務所",time:"2月14日 09:40",plate:"office58",s:`
+雑居ビルの三階、鳴海探偵事務所。廊下には、まだ塗料の匂いが残っている。
+事務所には、私一人だった。さほど広い部屋ではない。それでも、一人で座っていると持てあます広さがあって、どこか居心地が悪い。
+電話は、今朝も鳴らない。黒い塗りの艶に、うっすらと埃が積もりはじめていた。
+扉の外側には、ひと月前に貼った紙がそのままになっている。日に焼けて、角が少し丸まってきた。
+来たのは、保険の勧誘が一人と、道に迷った郵便配達が一人だけだった。
+もういいだろう。私は扉を開けて紙を剥がし、外套のポケットに押しこんだ。
+買いそろえた机や棚は、まだ他人行儀に真新しい。いずれは、愛着が湧いてくるのだろうか。
+!se door
+しばらくして、扉が遠慮がちに叩かれた。
+入ってきたのは、紺のコートを着た娘だった。十八、九だろう。腕に、包みを抱えている。
+千鶴：柚木千鶴と申します。綾織町で、洋装店をしております。……母の店でした。
+千鶴：探偵さんに、お願いがあって参りました。`,next:"c1_1"});
+def("c1_1",{ch:"第一章 尋ね人",place:"鳴海探偵事務所",time:"2月14日 09:50",plate:"office58",s:`
+私は湯を沸かし、湯呑みを二つ出した。娘は、膝の上の包みを両手で押さえていた。
+千鶴：母は、先月の終わりに亡くなりました。夜、店の階段から足を踏み外して。
+千鶴：その晩、私は洋裁学校の夜間部で遅くなって、友達の家に泊めてもらっていました。朝帰ったら、母が階段の下に……。
+千鶴：私には、兄がいます。……いました、と言うべきなのか、わかりません。
+千鶴：兄の正一は、戦争で出征したきり、帰ってきませんでした。戦死の知らせも、届いていません。
+千鶴：母は十年、毎年ラジオの尋ね人に、兄のことを出し続けていました。
+鳴海：あの戦争が終わって、十三年になる。
+千鶴：はい。周りの人は、もう諦めなさいと言いました。でも母は、毎年、原稿を書き直していました。
+千鶴：その母が亡くなって、十日ほどたったころです。兄だという人が、店に来ました。
+千鶴：「尋ね人の放送を聞いた。正一だ。帰ってきた」と。
+鳴海：あなたは、顔を覚えていない。
+千鶴：兄が出征したとき、私は四つでした。写真は、焼けてしまって。
+千鶴：あの人は、兄のことをよく知っています。ほくろの場所も、口癖も。母のことも、店のことも。
+千鶴：本物の兄なら、嬉しいはずなんです。それなのに、どうしても、うまく喜べなくて。
+千鶴は、少し黙った。それから、声を落とした。
+千鶴：それに、あの人が来てから、夜になると、二階のミシンがひとりでに動くんです。
+鳴海：ひとりでに。
+千鶴：私は一階の奥で寝ているんですけど、誰もいないはずの二階の作業場から、足踏みミシンの音がするんです。夜中の十二時を過ぎたころから、明け方まで。
+千鶴：朝になると、男物の背広が、少しずつ縫い進んでいるんです。母が縫いかけていたものではありません。誰が始めたのかもわかりません。
+千鶴：町の人たちは、うちに女郎蜘蛛が棲みついていると言います。夜、上の窓に、糸を操る女の影が映るって。
+千鶴：母を殺したのも、その女郎蜘蛛だと。
+私は、湯呑みを置いた。
+鳴海：あなたは、どう思うんです。
+千鶴：……わかりません。ただ、怖いとは、あまり思わないんです。小さいころから、あの家の二階には、何かがいる気がしていましたから。
+千鶴：母は、夜なべのとき、二階に湯呑みを一つ余分に置いていました。「二階の人の分」と言って。冗談だと思っていましたけど。
+千鶴：お願いしたいのは、二つです。あの人が本当に兄なのか。それと、夜のミシンが、何なのか。
+千鶴は包みを机に置いた。中から、封筒に入った札が出てきた。
+千鶴：これで、足りますか。
+鳴海：多すぎます。半分で結構。
+それでも、事務所のひと月分の家賃にはなる。
+鳴海：引き受けましょう。午後に、お店へうかがいます。`,next:"c2_0"});
+
+/* ---------- 第二章 ---------- */
+def("c2_0",{ch:"第二章 柚木洋装店",place:"綾織町",time:"2月14日 13:20",plate:"street",s:`
+綾織町は、川向こうの古い下町だった。
+電車を降りると、細い路地が何本も、迷路のように分かれていた。古い長屋と、建ったばかりの板張りの家とが、ちぐはぐに並んでいる。
+路地の奥に「柚木洋装店」の看板があった。間口二間の二階家で、その上に、低い屋根裏が継ぎ足されている。
+一階は表が店で、奥が茶の間と寝間。千鶴はそこで寝起きしているという。二階は、母親が作業場にしていた部屋だ。
+向かいは煙草屋だった。帳場の奥から、老婆がこちらをじっと見ていた。
+!se door
+ガラス戸を開けると、千鶴が奥から出てきた。
+千鶴：お待ちしていました。散らかっていますけど、どうぞ。
+店には反物の棚と、首のないトルソーが二体。壁に、型紙が何枚も吊るしてある。
+奥の板の間に、男が一人、背を丸めて座っていた。
+千鶴：……兄、です。今、ちょうど起きたところで。`,next:"c2_hub"});
+def("c2_hub",{ch:"第二章 柚木洋装店",place:"柚木洋装店",time:"2月14日 13:30",plate:"shop",hubFlag:"h2",intro:`
+男は、私に気づくと軽く頭を下げ、また黙って茶をすすった。
+三十代のなかばだろう。頬がこけ、日に焼けている。長いあいだ、どこか遠くにいた男の顔だった。
+千鶴：何から見ていただけますか。`,
+hub:{points:[
+  {f:"suit",t:"二階の作業場で、縫いかけの背広を見る",go:"c2_suit"},
+  {f:"box",t:"母が残した、尋ね人の原稿の控えを見せてもらう",go:"c2_box"},
+  {f:"oki",t:"兄を名乗る男と話す",go:"c2_oki",req:["box"]}
+],need:["suit","box","oki"],exitT:"日が暮れる前に、いったん店を出る",exit:"c2_end"}});
+def("c2_suit",{ch:"第二章 柚木洋装店",place:"柚木洋装店 二階 作業場",time:"2月14日 13:40",plate:"work",next:"c2_hub",s:`
+!set suit
+狭い階段を上がる。三段目が、ひときわ大きく軋んだ。
+二階は、作業場になっていた。
+窓際に、足踏みミシンが一台。黒い胴に金の唐草模様が剥げかけている。母が嫁入りのときに持ってきたものだという。
+衣桁に、男物の背広が掛けてあった。
+濃い鼠色の、仮縫いの背広だ。前身頃と袖は形になっているが、裏地はまだついていない。
+千鶴：毎朝、少しずつ進んでいるんです。昨日の朝は、右の袖がつきました。
+私は背広を手に取って、裾から縫い目をたどった。
+目が詰んでいる。ミシン目は、定規で測ったようにまっすぐだった。素人の仕事ではない。
+袖を左右並べると、左の袖だけが、一寸ほど短かった。
+鳴海：これは、わざとかな。
+千鶴：わかりません。仮縫いだから、あとで直すつもりなのかもしれませんけど……。
+!get E1
+縫い目に使われている糸を、爪の先でつまんでみた。
+髪の毛のように細い。それなのに、引いてもまるで切れる気配がない。光にかざすと、かすかに金色を帯びていた。
+千鶴：その糸も、うちのものじゃないんです。こんな糸、仕入れたことがありません。
+!get E2
+天井の隅に、四角い板の蓋があった。屋根裏への上がり口だろう。
+千鶴：屋根裏は、物置です。祖母の代の古い道具が置いてあるだけで。……あそこには、あまり上がらないんです。`});
+def("c2_box",{ch:"第二章 柚木洋装店",place:"柚木洋装店 帳場",time:"2月14日 14:10",plate:"shop",next:"c2_hub",s:`
+!set box
+千鶴は、帳場の引き出しから、紐で綴じた紙の束を出した。
+千鶴：母が、尋ね人に出した原稿の控えです。毎年、書き直していました。
+一枚目は、終戦の翌年の日付だった。几帳面な、細い字が並んでいる。
+「柚木正一。出征時十九歳。左ノ眉ノ上ニ、ホクロ一ツ」
+年ごとに、少しずつ書き足されていく。
+「口癖ハ『ソウダナア』。考エルトキ、必ズ言フ」
+「算盤ガ得意。暗算モ速シ」
+「魚ノ目玉ヲ嫌フ。焼キ魚ノ目ヲ、イツモ母ニ取ラセル」
+最後の一枚は、去年の秋のものだった。
+「母ハ待ツテヰマス。店ノ二階デ、待ツテヰマス」
+千鶴：放送が流れるたびに、母はラジオの前で、じっと手を止めていました。
+!get E3
+私は、控えを一枚ずつめくった。
+ここに書かれたことは、ラジオで全国に流れている。十年分、毎年。
+聞いていた人なら、誰でも覚えられる。`});
+def("c2_oki",{ch:"第二章 柚木洋装店",place:"柚木洋装店 奥の板の間",time:"2月14日 14:30",plate:"shop",next:"c2_bc",s:`
+!set oki
+私は、男の向かいに座った。
+鳴海：鳴海と申します。妹さんに頼まれて、お話をうかがいに来ました。
+正一：……そうだなあ。探偵さん、ですか。
+男は、ゆっくりと湯呑みを置いた。
+正一：疑われるのは、しかたない。十四年もたって、急に現れたんですから。
+鳴海：どちらにおられたんです。
+正一：ずっと遠くの、収容所に。帰ってきたのは、去年の暮れです。しばらく体を悪くして、病院にいました。
+正一：正月に、ラジオで自分の名前を聞いたんです。おふくろが、まだ待ってると。
+正一：……帰ってきたら、おふくろはもう、死んでいた。
+男の左の眉の上に、小さなほくろがあった。
+鳴海：子どものころのことを、何か覚えていますか。
+正一：そうだなあ。算盤は得意でした。焼き魚の目玉が嫌いで、いつもおふくろに取ってもらって。
+正一：それから、出征の朝に、おふくろがボタンを一つくれた。帰ってきたら背広を仕立ててやる、そのボタンを付けるから、なくすなって。
+私は、手帳を開いた。原稿の控えと、男の話を、並べてみる。`});
+def("c2_bc",{ch:"第二章 柚木洋装店",place:"柚木洋装店 奥の板の間",time:"2月14日 14:40",plate:"shop",mini:"broadcast",next:"c2_oki2"});
+def("c2_oki2",{ch:"第二章 柚木洋装店",place:"柚木洋装店 奥の板の間",time:"2月14日 14:50",plate:"shop",next:"c2_hub",s:`
+ほくろも、口癖も、算盤も、魚の目玉も。男の話のほとんどは、十年分の放送のどこかに出てくる。
+ただ一つ、出征の朝のボタンの話だけは、どの原稿にも書かれていなかった。
+千鶴が、台所の入り口で、息をのんでいた。
+千鶴：……ボタンのこと、母から聞いたことがあります。兄さんに渡したって。
+男は、目を伏せた。
+正一：そのボタンは、なくしてしまった。……申しわけない。
+それきり、男は何も言わなかった。
+本物の兄なのか。それとも、どこかでその話を聞いたのか。
+まだ、どちらとも言えない。`});
+def("c2_end",{ch:"第二章 柚木洋装店",place:"綾織町",time:"2月14日 17:10",plate:"street",s:`
+店を出ると、路地はもう薄暗かった。
+向かいの煙草屋の帳場で、老婆がまだこちらを見ていた。
+振り返ると、洋装店のいちばん上の窓が、夕日を受けて赤く光っていた。
+通りがかりのおかみさんが二人、ひそひそと話しながら、その窓を見上げていった。
+「ほら、あそこよ。夜になると、女郎蜘蛛が出るって」
+「タエさんも、あれに取り殺されたんでしょう。あの兄さんだって、そのうち……」
+女郎蜘蛛。きれいな女の姿で男を誘い、糸で絡めとって喰らうという、蜘蛛の化け物だ。
+私は、窓をもう一度見上げた。
+明日は、あの窓の話を、町の人から聞いてみよう。`,next:"c3_0"});
+
+/* ---------- 第三章 ---------- */
+def("c3_0",{ch:"第三章 女郎蜘蛛",place:"綾織町",time:"2月15日 10:00",plate:"street",s:`
+翌朝、綾織町へ向かう電車の中で、私は昨夜千鶴に聞いた話を思い返していた。
+昨夜も、ミシンは動いたそうだ。今朝、背広の襟がついていたという。
+千鶴は一階の奥の寝間で、天井越しにその音を聞きながら、布団の中でじっとしていたという。階段を上がって見る勇気は、まだないと言っていた。
+路地に入ると、煙草屋の老婆が、もう帳場に座っていた。`,next:"c3_hub"});
+def("c3_hub",{ch:"第三章 女郎蜘蛛",place:"綾織町",time:"2月15日 10:20",plate:"street",hubFlag:"h3",intro:`
+女郎蜘蛛の噂は、思ったよりも町に広がっていた。
+タエが亡くなった夜のこと。窓の影のこと。誰が何を見て、何を言っているのか。
+一つずつ、確かめておきたい。`,
+hub:{points:[
+  {f:"kiyo",t:"向かいの煙草屋で、店番のキヨに話を聞く",go:"c3_kiyo"},
+  {f:"tashiro",t:"駐在所で、タエの死を調べた巡査に会う",go:"c3_tashiro"},
+  {f:"gondo",t:"碁会所で、金貸しの権藤に会う",go:"c3_gondo"},
+  {f:"win",t:"煙草屋の帳場から、洋装店の窓を見上げてみる",go:"c3_win",req:["kiyo"]},
+  {f:"spin",t:"千鶴に、屋根裏の古い道具のことを聞く",go:"c3_spin",req:["kiyo"]}
+],need:["kiyo","tashiro","gondo"],exitT:"日が暮れてきた。洋装店へ戻る",exit:"c3_end"}});
+def("c3_kiyo",{ch:"第三章 女郎蜘蛛",place:"煙草屋",time:"2月15日 10:30",plate:"street",next:"c3_hub",s:`
+!set kiyo
+煙草を一箱買うと、老婆はようやく口を開いた。
+キヨ：あんた、昨日から洋装店に出入りしてる人だね。探偵さんだって？
+キヨ：あたしは何でも見てるよ。この帳場に座って、四十年だもの。
+鳴海：タエさんが亡くなった晩のことを、聞かせてもらえますか。
+キヨ：一月の二十八日だね。寒い晩だった。
+キヨ：十時ごろだったよ。ラジオの歌の番組が始まったところだったから。向かいの二階の窓に明かりがついて、女の影が映ってたの。
+キヨ：手をこう、大きく回してね。糸を繰ってるみたいだった。あたしはてっきり、タエさんが夜なべをしてると思ったのさ。
+キヨ：次の朝、タエさんが死んでたって聞いて、腰が抜けたよ。
+鳴海：その窓は、二階の窓ですか。
+キヨ：そうだよ。ここから見えるのは、二階の窓だもの。
+キヨ：それがね。千鶴ちゃんとこに兄さんって人が来てから、毎晩、同じ影が出るのさ。タエさんはもういないのに。
+キヨ：だから、あの晩の影も、タエさんじゃなかったんだよ。女郎蜘蛛だったんだ。あれがタエさんを階段から突き落としたに決まってる。
+キヨ：町の若い衆は、そのうち蜘蛛退治をするって息巻いてるよ。屋根裏の古い道具を、みんな燃やしちまえって。
+!get E4
+老婆は、帳場の座布団の上で、ずっと背を丸めたまま話していた。
+帳場は店の奥の、一段高いところにある。向かいの洋装店の店先には、看板を載せた深い庇が、路地に張り出していた。`});
+def("c3_tashiro",{ch:"第三章 女郎蜘蛛",place:"綾織町 駐在所",time:"2月15日 11:30",plate:"street",next:"c3_hub",s:`
+!set tashiro
+駐在所の田代巡査は、二十代の半ばの、生真面目そうな男だった。
+田代：柚木タエさんの件ですか。……あれは、事故です。本官が検分しました。
+田代：一月二十九日の朝六時、娘さんが階段の下で倒れているお母さんを見つけて、駆けこんできました。
+田代：首の骨が折れていました。体の冷えかたと、硬くなりかたから見て、亡くなったのは前の晩の九時から十一時のあいだです。
+田代：争ったあともなく、物も盗られていない。夜なべの途中で、暗い階段を踏み外したんでしょう。
+鳴海：ずいぶん幅があるんですね。九時から十一時。
+田代：それ以上は、医者でもしぼれません。ただ、十時に向かいのキヨさんが、窓に明かりと影を見ています。ですから、十時まではご存命だったと考えています。
+田代は、少し声を落とした。
+田代：……正直に言うと、本官も、例の噂は気になっているんです。毎晩、同じ影が出ると聞いて。
+田代：まさか本当に化け物がいるなんて、思っちゃいませんけど。
+!get E5`});
+def("c3_gondo",{ch:"第三章 女郎蜘蛛",place:"綾織町 碁会所",time:"2月15日 13:00",plate:"go",next:"c3_hub",s:`
+!set gondo
+碁会所の二階は、煙草の煙でかすんでいた。
+窓際の碁盤の前に、恰幅のいい男が座っていた。上等な外套を椅子の背に掛けている。
+権藤：権藤だ。あんたが、柚木の娘に雇われた探偵か。
+権藤：俺は、タエさんに金を貸していた。三年前、店を改装するときにな。月賦の残りが、まだ二万円ある。
+権藤：娘さんには気の毒だが、払えないなら、店をかたにもらうしかない。……もっとも、兄貴が帰ってきたんだ。兄貴と話をつけるさ。
+鳴海：一月二十八日の晩、あなたは洋装店に行っていますね。
+権藤は、碁石をつまんだまま、眉ひとつ動かさなかった。
+権藤：行ったよ。九時すぎだ。月賦の話をしにな。タエさんは、もう少し待ってくれと言った。
+権藤：九時半には店を出て、ここに来た。それから朝まで、ここで打っていた。席主に聞いてみな。
+権藤：それにな、十時に煙草屋のキヨ婆さんが、窓のタエさんを見てる。俺が帰ったあとも、タエさんはぴんぴんしてたってことだ。
+!get E6
+権藤：あの家には、気味の悪いものが棲みついてる。タエさんをやったのは、そいつだろうよ。
+権藤：探偵さんも、早く手を引いたほうがいい。蜘蛛の糸に巻かれないうちにな。
+席主に確かめると、権藤は九時四十分ごろに来て、朝まで碁を打っていたという。`});
+def("c3_win",{ch:"第三章 女郎蜘蛛",place:"煙草屋",time:"2月15日 14:30",plate:"street",next:"c3_wmini",s:`
+!set win
+もう一度煙草屋に寄って、帳場の脇に上がらせてもらった。
+キヨ：探偵さんも物好きだね。そこはあたしの特等席だよ。
+鳴海：少し、お借りします。
+私は帳場の座布団に座り、キヨと同じ高さから、向かいの洋装店を見上げた。`});
+def("c3_wmini",{ch:"第三章 女郎蜘蛛",place:"煙草屋 帳場",time:"2月15日 14:40",plate:"street",mini:"window",next:"c3_win2"});
+def("c3_win2",{ch:"第三章 女郎蜘蛛",place:"煙草屋 帳場",time:"2月15日 14:50",plate:"street",next:"c3_hub",s:`
+座った目の高さからは、洋装店の店先に張り出した看板の庇が、二階の窓をすっぽり隠していた。
+庇の上にのぞいているのは、その上の、屋根裏の小さな窓だけだった。
+継ぎ足した屋根裏の窓は、通りから見ると、ちょうど普通の家の二階の窓くらいの高さにある。
+キヨが四十年「二階の窓」だと思って見てきたのは、屋根裏の窓だったのだ。
+キヨ：……おや、本当だ。立ってみると、二階の窓はあっちにあるんだねえ。
+キヨ：座ってばかりいたから、ちっとも知らなかったよ。
+!get E7`});
+def("c3_spin",{ch:"第三章 女郎蜘蛛",place:"柚木洋装店",time:"2月15日 15:30",plate:"shop",next:"c3_hub",s:`
+!set spin
+洋装店に寄ると、千鶴は帳場で、客の外套の裾をかがっていた。
+鳴海：屋根裏には、何が置いてあるんです。
+千鶴：古い長持と、行李と……それから、糸車があります。祖母が若いころ、お蚕さんの糸を紡いでいたそうです。
+鳴海：お母さんは、それを使っていましたか。
+千鶴：いいえ。母は、糸車の使い方を知りませんでした。祖母から習わなかったんです。
+千鶴：「あれは、うちの者には回せない」って、よく笑っていました。私も、回したことはありません。
+千鶴：屋根裏には、窓が一つあるだけです。夜に明かりをつけることなんて、ありません。
+千鶴は、針を止めた。
+千鶴：……そういえば、あの糸車、ちっとも埃をかぶっていないんです。誰も上がらないのに。
+!get E8`});
+def("c3_end",{ch:"第三章 女郎蜘蛛",place:"綾織町",time:"2月15日 17:30",plate:"street",s:`
+日が暮れて、路地に明かりがともりはじめた。
+銭湯帰りの若い男たちが、洋装店の前で立ち止まって、上の窓を指さしていた。
+「今夜あたり、上がって退治してやろうか」
+「やめとけ。祟られるぞ」
+笑い声が遠ざかっていく。
+私は、手帳を閉じた。
+窓の影。九時から十一時のあいだの死。九時半に店を出たという権藤。月賦の残り。兄を名乗る男。
+糸は、何本も絡まっている。どの糸が、どこに掛かっているのか。`,next:"c4_0"});
+
+/* ---------- 第四章 ---------- */
+def("c4_0",{ch:"第四章 二冊目の帳簿",place:"柚木洋装店 帳場",time:"2月16日 11:00",plate:"shop",s:`
+翌日の昼前、私が店にいるところへ、権藤がやってきた。
+!se door
+権藤：千鶴ちゃん、いるかい。今日は、ちゃんとした書きつけを持ってきた。
+権藤は、帳場に一枚の紙を広げた。
+権藤：三年前、タエさんに改装の金を貸した。月四千円の三十回払い。二十五回目までは受け取った。残りの五回、二万円がまだだ。
+権藤：払ったと言うなら、俺の受取の控えを出してもらおう。俺は毎回、ちゃんと控えを渡してる。
+!get E9
+千鶴は青い顔で、帳場の引き出しから帳簿を出した。
+千鶴：母は、控えを必ず帳簿に挟んでいました。……でも、ないんです。どこを探しても。
+帳簿をめくると、月賦の欄は、去年の九月からぷっつりと空白になっていた。
+!get E10
+権藤：そら見ろ。払ってないんだよ。
+権藤：期日は月末だ。それまでに払えないなら、この店は俺がもらう。兄貴とも、もう話はついてるんだ。
+奥の板の間で、兄を名乗る男がうつむいたまま、湯呑みを握りしめていた。
+権藤は、上機嫌で帰っていった。`,next:"c4_1"});
+def("c4_1",{ch:"第四章 二冊目の帳簿",place:"柚木洋装店 屋根裏",time:"2月16日 13:30",plate:"attic",s:`
+私は千鶴に断って、屋根裏に上がらせてもらった。
+天井の板の蓋を押し上げると、乾いた木と、かすかに甘い匂いがした。
+屋根裏は低く、腰をかがめなければ歩けない。小さな窓が一つ、通りのほうに向いて開いている。
+奥に、古い糸車があった。
+千鶴の言ったとおり、埃ひとつかぶっていない。糸巻きには、金色を帯びた細い糸が、きれいに巻き取られていた。
+背広に使われていたのと、同じ糸だ。
+糸車のそばに、小さな文机があった。その上に、算盤が一つ。
+そして、和紙を綴じた帳簿が、一冊。
+表紙には何も書いていない。開くと、細く、几帳面な字が、びっしりと並んでいた。
+タエの字ではない。原稿の控えの字とは、筆の運びがまるで違う。
+「九月二十五日　月賦　四千円　権藤氏ニ渡ス　控 第二十六号」
+店の出入りが、一円も違わずに写してある。月賦の欄も、毎月。権藤の控えの番号まで。
+文机の端に、湯呑みが一つ置いてあった。底に、まだ少しだけ茶が残っている。
+梁の奥の暗がりで、何かがかすかに動いた気がした。目を凝らしたが、古い行李の影しか見えない。鼠だろうか。
+!get E11`,next:"c4_ledger"});
+def("c4_ledger",{ch:"第四章 二冊目の帳簿",place:"柚木洋装店 屋根裏",time:"2月16日 13:50",plate:"attic",mini:"ledger",next:"c4_2"});
+def("c4_2",{ch:"第四章 二冊目の帳簿",place:"柚木洋装店 屋根裏",time:"2月16日 14:20",plate:"attic",s:`
+月賦は、三十回目まで、きちんと払い終えていた。最後の支払いは一月二十五日。
+控えの番号も、二十六号から三十号まで、すべて写してある。
+そして、帳簿の最後の行。
+「一月二十八日　夜九時十分　権藤氏来ル」
+その次の行は、二月十日まで、何も書かれていなかった。
+二月十日の行には、ただ一言。
+「正一ト名乗ル方　来ル」
+私は、帳簿を閉じた。
+この帳簿をつけていたのは、誰なのか。
+書き手は、あの男を「正一」とは書いていない。「正一と名乗る方」と書いている。
+階段の下から、千鶴が心配そうに呼んでいた。
+千鶴：鳴海さん、大丈夫ですか。
+鳴海：千鶴さん。今夜、店の下で、夜明かしをさせてもらえますか。
+鳴海：夜のミシンを、見てみたい。`,next:"c5_0"});
+
+/* ---------- 第五章 ---------- */
+def("c5_0",{ch:"第五章 夜の作業場",place:"柚木洋装店 帳場",time:"2月16日 23:40",plate:"shop",s:`
+千鶴は、今夜は友人の家に泊まることにした。兄を名乗る男は、一階の奥の板の間で寝ている。
+私は帳場の火鉢のそばで、外套にくるまって座っていた。
+店の柱時計が、ゆっくりと時を刻んでいる。
+十二時を、少し過ぎたころだった。
+!se sew
+頭の上で、ミシンが鳴りはじめた。
+かたん、かたん、かたん。足踏みの、ゆったりとした拍子。
+板の間で、男が寝返りを打つ音がした。目を覚ましたのかどうかは、わからない。
+私は靴を脱ぎ、昼に覚えた三段目をまたいで、音を立てないように階段を上がった。`,next:"c5_1"});
+def("c5_1",{ch:"第五章 夜の作業場",place:"柚木洋装店 二階 作業場",time:"2月17日 00:10",plate:"worknight",s:`
+作業場には、誰もいなかった。
+月明かりの中で、ミシンの弾み車だけが、まだ回っていた。誰も乗っていない踏み板が、惰性でゆっくりと上下し、やがて止まった。
+ついさっきまで、誰かがここで踏んでいたのだ。
+衣桁の背広が、なかった。ミシンの上に広げられ、左の袖を縫いかけたまま、針が布に刺さっている。
+天井の隅で、屋根裏の蓋が、まだかすかに揺れていた。隙間から、細い明かりが一筋もれている。
+!se spin
+蓋の上から、からからと、何かが軽く回る音が聞こえてきた。糸車の音だ。
+私は梯子に手をかけた。`,next:"c5_2"});
+def("c5_2",{ch:"第五章 夜の作業場",place:"柚木洋装店 屋根裏",time:"2月17日 00:20",plate:"atticnight",track:"silk",s:`
+屋根裏に、女が一人、座っていた。
+糸車の前に背筋を伸ばして座り、ゆっくりと車を回している。
+頭には、色の褪せた花柄の布を目深にかぶり、あごの下で結んでいた。バブーシュカ、と言っただろうか。北の国の女たちがかぶる布だ。行灯の明かりが布の縁に影をつくって、顔はよく見えない。
+年のころは、二十歳くらいに見えた。布の下から、後ろで一つにまとめた黒い髪がのぞいている。
+行灯の明かりが、女の影を、通りに向いた窓の障子に大きく映していた。
+二階の人：三段目を、またいで上がってこられましたね。
+鳴海：……聞こえていたのか。
+二階の人：二段目と四段目が鳴って、三段目だけが鳴りませんでした。あそこがいちばん大きく鳴ることを、昼のうちに覚えておかれたのでしょう。
+二階の人：それから、ミシンを放って逃げた私を追わずに、まず背広をご覧になった。逃げるものより、残されたものを先に調べる方なんですね。
+鳴海：……あなたは。
+二階の人：この家の方々は、「二階の人」と呼んでいました。名前は、ありません。
+二階の人：鳴海さん、ですね。探偵さんの。昼にここへ上がっていらしたとき、梁の奥から拝見していました。お気づきにならなかったようですけど。
+女は、文机の上の算盤の珠を、指先で一つ弾いた。何かを計算しているわけではないらしい。
+鳴海：帳簿をつけていたのは、あなたですね。
+二階の人：はい。この家に来たときから。タエさんのお祖母さまの代からです。
+二階の人：私にできるのは、糸を紡ぐことと、帳簿をつけることだけですから。
+鳴海：夜のミシンも。
+二階の人：はい。家の方が眠っている夜のあいだだけ、踏ませていただいています。人の目のあるところには、出ないことにしていますから。
+二階の人：あの背広は、タエさんのお約束です。正一さんが帰ったら仕立てる、と。
+二階の人：タエさんが亡くなって、お約束だけが残りました。……誰かが、果たさなければいけません。
+鳴海：あの男は、正一さんではないんですね。
+女は、すぐには答えなかった。算盤の珠を、もう一つ弾いた。
+二階の人：私は、この家の外のことを、帳簿に書いてあること以上には知りません。
+二階の人：ただ、あの背広は、正一さんの寸法で縫っています。
+二階の人：ミシンの引き出しの、二重底をご覧ください。タエさんが、誰にも見せずにしまっていたものがあります。`,next:"c5_3"});
+def("c5_3",{ch:"第五章 夜の作業場",place:"柚木洋装店 二階 作業場",time:"2月17日 00:40",plate:"worknight",track:"silk",s:`
+ミシンの引き出しを抜くと、底板が、指で押すとわずかに沈んだ。
+持ち上げると、その下に、折りたたんだ紙が一枚入っていた。
+タエの字の、採寸表だった。
+日付は、正一が出征する前の日。首まわり、肩幅、胸まわり、着丈、袖丈。
+袖丈の欄に、小さく書き添えてある。
+「左一寸詰メ(幼時骨折)」
+!get E12
+私は、ミシンの上の背広と、採寸表を並べてみた。`,next:"c5_measure"});
+def("c5_measure",{ch:"第五章 夜の作業場",place:"柚木洋装店 二階 作業場",time:"2月17日 00:50",plate:"worknight",track:"silk",mini:"measure",next:"c5_4"});
+def("c5_4",{ch:"第五章 夜の作業場",place:"柚木洋装店 屋根裏",time:"2月17日 01:20",plate:"atticnight",track:"silk",s:`
+背広は、採寸表の数字どおりに縫われていた。左の袖も、一寸短く。
+私は、昼間の男の姿を思い出していた。茶をすするとき、湯呑みを左手で持ち上げていた。両腕を、同じように伸ばして。
+屋根裏に戻ると、女はまた糸車を回していた。
+鳴海：一月二十八日の夜のことを、聞かせてください。
+糸車の音が、少しだけ遅くなった。
+二階の人：九時十分に、権藤さんが来られました。私は、帳簿にそう書きました。
+二階の人：下で、大きな声がしていました。それから、階段で、何かが落ちる音がしました。
+二階の人：私は、下りられませんでした。私はこの屋根裏と二階から、下へは出られないんです。そういうものなので。
+二階の人：だから、帳簿の続きを書くことも、できませんでした。
+二階の人：十時に、私はいつものように糸を紡ぎました。……何をしていいか、わからなかったので。
+女は、糸車を止めた。
+二階の人：鳴海さん。私の帳簿は、人の役には立ちませんか。
+鳴海：あなたの帳簿は、正しい。それは私が知っています。
+鳴海：ただ、人に信じてもらうには、人の言葉で、もう一度帳簿をつけ直さなければいけない。
+鳴海：明日、それをやります。
+女は、少しだけ笑ったように見えた。
+二階の人：それでは、明日の分の湯呑みを、用意しておきます。
+窓の外が、白みはじめていた。`,next:"c6_0"});
+
+/* ---------- 第六章 ---------- */
+def("c6_0",{ch:"第六章 糸の掛け直し",place:"柚木洋装店 二階 作業場",time:"2月17日 15:00",plate:"work",s:`
+午後三時。私は、作業場に人を集めた。
+千鶴。兄を名乗る男。権藤。そして、田代巡査。
+階段の下には、噂を聞きつけた近所の人たちが、何人も詰めかけていた。若い男たちの中には、手に薪や灯油の缶を下げている者もいる。
+権藤：何の集まりだ。俺は忙しいんだがね。
+田代：鳴海さん。タエさんの件で、話があると聞きましたが。
+鳴海：この家には、何本もの糸が掛かっています。それを、一本ずつ掛け直したい。
+鳴海：まず一本目。一月二十八日の夜十時に、窓に映った影のことです。
+階段の下から、声が飛んだ。
+「女郎蜘蛛だ。決まってるだろう」
+「屋根裏の道具を燃やしちまえ。そうすりゃ影も出なくなる」
+権藤：俺は、あれはタエさんだったと思うがね。キヨ婆さんがそう言ってるんだ。
+窓の影は、誰だったのか。`,choices:[
+  {t:"窓の影は、タエさんではなかったと示す",go:()=>(S.ev.has("E7")&&S.ev.has("E8"))?"c6_a1":"c6_n1"},
+  {t:"窓の影は、この家に棲む女郎蜘蛛だったと認める",go:"c6_s1"}]});
+def("c6_a1",{ch:"第六章 糸の掛け直し",place:"柚木洋装店 二階 作業場",time:"2月17日 15:05",plate:"work",s:`
+鳴海：キヨさんは、十時に「二階の窓」に影を見たと言っています。
+鳴海：ですが、キヨさんがいつも座っている場所から見えるのは、この作業場の窓ではありません。`,ask:{q:"キヨが見た窓が、二階の作業場の窓ではないことを示す証拠をつきつけろ。",accept:["E7"],ok:"c6_a2",ng:"鳴海：……いや。それでは、キヨさんがどの窓を見たのかまでは言えない。"}});
+def("c6_a2",{ch:"第六章 糸の掛け直し",place:"柚木洋装店 二階 作業場",time:"2月17日 15:10",plate:"work",s:`
+鳴海：帳場に座ったキヨさんの目の高さからは、この店の看板の庇が、二階の窓を隠してしまう。見えるのは、その上の屋根裏の窓だけです。
+鳴海：あの晩、影が映っていたのは、屋根裏の窓でした。
+田代：屋根裏……。ですが、屋根裏だろうと二階だろうと、タエさんが夜なべをしていたことに変わりは。
+鳴海：影は、片手で何かを大きく回し、もう片方の手で糸を引き出していた。屋根裏にあるのは、古い糸車です。`,ask:{q:"影がタエではありえないことを示す証拠をつきつけろ。",accept:["E8"],ok:"c6_a3",ng:"鳴海：……いや。それでは、影がタエさんでないとまでは言えない。"}});
+def("c6_a3",{ch:"第六章 糸の掛け直し",place:"柚木洋装店 二階 作業場",time:"2月17日 15:15",plate:"work",s:`
+千鶴：……母は、糸車を回せませんでした。習わなかったんです。「あれはうちの者には回せない」って。
+鳴海：十時の影は、タエさんではなかった。だから、十時にタエさんが生きていた証拠には、なりません。
+鳴海：田代さんの見立てでは、タエさんが亡くなったのは九時から十一時のあいだ。九時台でも、おかしくない。
+田代巡査が、ゆっくりと権藤のほうを向いた。
+権藤：……おいおい。それで俺を疑うってのか。
+権藤：九時に店に来たのは認めたよ。だがな、俺は月賦の取り立てに来ただけだ。タエさんは、俺が帰るときには生きてた。
+権藤：だいたい、俺には理由がない。金を貸してる相手を殺して、何になる。
+鳴海：二本目の糸です。月賦は、本当に残っていたんですか。`,ask:{q:"月賦がすでに払い終えられていたことを示す証拠をつきつけろ。",accept:["E11"],ok:"c6_b1",ng:"鳴海：……いや。それだけでは、月賦を払い終えていたとは言えない。"}});
+def("c6_b1",{ch:"第六章 糸の掛け直し",place:"柚木洋装店 二階 作業場",time:"2月17日 15:25",plate:"work",s:`
+私は、屋根裏の帳簿を開いて、田代巡査に渡した。
+鳴海：この家には、もう一冊、帳簿がありました。月賦は三十回目まで、一月二十五日に払い終えている。あなたの控えの番号も、二十六号から三十号まで写してあります。
+鳴海：店の帳簿に挟んであったはずの控えは、一枚も残っていない。控えがなくなって得をするのは、残りがあると言い張れる人だけです。
+鳴海：あなたは一月二十八日の夜九時十分に、控えを取りに来た。タエさんと揉み合いになり、タエさんは階段から落ちた。
+権藤の顔から、血の気が引いた。だが、すぐに、口の端をゆがめて笑った。
+権藤：その帳簿、誰の字だ。タエさんの字じゃないだろう。
+権藤：屋根裏の化け物がつけた帳簿だってのか。そんなものが、証拠になるかね。
+田代巡査が、困ったように私を見た。
+権藤の言うとおりだ。この帳簿の書き手を、私は人前に出すことができない。
+あの晩、権藤が店から出てくるところを見た、人間の目がいる。
+私は、部屋の隅に立っている男のほうを向いた。
+鳴海：三本目の糸です。
+鳴海：あなたは、柚木正一さんではありませんね。`,ask:{q:"この男が正一ではないことを示す証拠をつきつけろ。",accept:["E12"],ok:"c6_c1",ng:"鳴海：……いや。それは放送で流れたことだ。誰でも知ることができる。"}});
+def("c6_c1",{ch:"第六章 糸の掛け直し",place:"柚木洋装店 二階 作業場",time:"2月17日 15:35",plate:"work",s:`
+私は、ミシンの引き出しから出てきた採寸表を広げた。
+鳴海：出征の前の日に、タエさんが取った正一さんの寸法です。袖丈の欄に、「左一寸詰め」とある。正一さんは子どものころ左腕を折って、左腕が少し短かった。
+鳴海：このことは、十年分の尋ね人の原稿に、一度も書かれていない。
+鳴海：正一さん。腕を、まっすぐ前に伸ばしてみてください。
+男は動かなかった。
+千鶴が、衣桁から背広を外して、男の前に差し出した。夜のうちに、左の袖まで縫い上がった背広だった。
+男は、長いあいだそれを見つめていた。それから、両腕をゆっくりと前に伸ばした。
+両腕の長さは、同じだった。
+背広の左の袖は、男の手首の上で、一寸足りずに止まった。
+正一：……そうだなあ。
+男は、小さく笑った。泣いているようにも見えた。
+正一：その口癖は、正一のです。うつってしまったんです。三年、同じ収容所の、隣の寝床にいたから。
+沖野：沖野伸治といいます。正一の、戦友です。
+!se thud
+権藤が、椅子を蹴って立ち上がった。
+権藤：てめえ、話が違うじゃねえか。`,next:"c6_c2"});
+def("c6_c2",{ch:"第六章 糸の掛け直し",place:"柚木洋装店 二階 作業場",time:"2月17日 15:45",plate:"work",track:"dusk",s:`
+沖野は、権藤には目もくれず、千鶴の前に膝をついた。
+沖野：正一は、収容所で死にました。三年目の冬です。熱を出して、四日目に。
+沖野：死ぬ前に、これを預かりました。おふくろに返してくれ、と。
+沖野は、内ポケットから小さな紙包みを出した。開くと、黒い角ボタンが一つ入っていた。
+沖野：帰ったら背広を作ってもらう約束だった。そのボタンを付けるんだ、と。あいつは毎晩、それを握って寝ていました。
+!get E14
+沖野：去年の暮れに帰ってきて、すぐにここへ来るつもりでした。でも、どんな顔をして、正一は死んだと言えばいいのか、わからなくて。
+沖野：この町の近くまで来て、何日もうろうろしていたときに、その人に声をかけられたんです。
+沖野は、権藤のほうを見ずに言った。
+沖野：俺は、帰ってすぐのころ、食うに困って少し悪いことをしていた。それを、その人は知っていた。
+沖野：正一のふりをしろと言われました。店を相続したら、その人に売れと。断ったら、警察に突き出すと。
+沖野：……一月二十八日の晩も、その人に呼ばれて、この路地で待たされていました。
+沖野：九時二十五分ごろ、その人が、この店から出てきました。紙の束を、外套の内側に押しこみながら。
+沖野：店の中で、何かがあったのはわかっていました。それなのに、俺は黙っていた。
+!get E13
+田代巡査が、権藤の腕をつかんだ。
+田代：権藤さん。駐在所まで、ご同行願います。
+権藤は、何か言いかけて、口を閉じた。外套の内側から、紙の束が一枚、床に落ちた。
+権藤の受取の控えだった。第二十六号。焼き捨てずに、持ち歩いていたのだ。
+千鶴は、ボタンを両手で包んだまま、声を立てずに泣いていた。`,next:"c7_0"});
+def("c6_n1",{ch:"第六章 糸の掛け直し",place:"柚木洋装店 二階 作業場",time:"2月17日 15:05",plate:"work",s:`
+鳴海：十時の影は、タエさんではなかった。
+権藤：ほう。じゃあ誰だ。
+鳴海：それは……。
+私は、言葉に詰まった。
+キヨが見た窓がどれだったのか。タエが糸車を回せたのかどうか。それを確かめないまま、私はここに立っていた。
+権藤：話にならんね。キヨ婆さんは、十時にタエさんを見てる。俺はその前に帰ってる。それで終わりだ。
+田代巡査も、気まずそうに目をそらした。
+私は、手の中の糸を、一本取り落とした。
+残っている糸は、一本だけだった。`,next:"c6_n2"});
+def("c6_n2",{ch:"第六章 糸の掛け直し",place:"柚木洋装店 二階 作業場",time:"2月17日 15:20",plate:"work",s:`
+私は、ミシンの引き出しから出てきた採寸表を広げ、男に、両腕を伸ばしてもらった。
+両腕の長さは、同じだった。夜のうちに縫い上がった背広の左の袖は、男の手首に一寸足りなかった。
+男は、正一ではなかった。
+正一：……そうだなあ。
+男はそれだけ言って、深く頭を下げた。権藤のほうを、一度だけおびえたように見た。
+その夜のうちに、男は町からいなくなった。何も話さないまま。
+権藤は、兄の件は自分も騙されていたと言い、月賦の取り立てを続けた。
+屋根裏の帳簿は、誰の字かもわからない、ただの紙の束として扱われた。`,next:"end_half"});
+def("c6_s1",{ch:"第六章 糸の掛け直し",place:"柚木洋装店 二階 作業場",time:"2月17日 15:05",plate:"work",s:`
+鳴海：……あの晩の影も、毎晩の影も、同じものでしょう。
+鳴海：この家の屋根裏には、人ではない何かが棲んでいる。
+階段の下で、どよめきが起きた。
+「そら見ろ」
+「探偵さんのお墨付きだ。上がれ、上がれ」
+若い男たちが、薪と灯油の缶を持って、階段を駆け上がってきた。
+千鶴：待って、やめて。
+千鶴の声は、男たちの足音にかき消された。
+!se thud
+屋根裏の蓋が、乱暴に押し上げられた。`,next:"end_spider"});
+
+/* ---------- 結末 ---------- */
+def("end_half",{ch:"結末",place:"綾織町",time:"3月31日 22:00",plate:"street",ending:{t:"店じまい「女郎蜘蛛」",hint:"第三章で、キヨの座る場所から窓を見上げ、千鶴に屋根裏の道具のことを聞いていれば。"},s:`
+三月の末、柚木洋装店は、月賦のかたに権藤の手に渡った。
+千鶴は、洋裁学校の先生の店に、住み込みで入ることになった。
+背広は、左の袖まで縫い上がったまま、作業場の衣桁に掛かっていた。千鶴は、それを持っていかなかった。誰のための背広なのか、最後までわからなかったから。
+店は、取り壊されることになった。権藤が、ここに貸し店舗を建てるのだという。
+夜のミシンは、男が町を去った夜から、二度と鳴らなかった。
+取り壊しの前の晩、私は一度だけ、路地に立った。
+煙草屋は、もう店を閉めていた。
+見上げると、屋根裏の窓に、ぼんやりと明かりがついていた。
+障子に、女の影が映っていた。片手で糸車を回し、もう片方の手で、細い糸を引き出している。
+影は、いつまでも手を止めなかった。
+帰る家がなくなることを、知っているのだろうか。
+翌朝、家は跡形もなく崩された。屋根裏から、糸車は出てこなかったという。`});
+def("end_spider",{ch:"結末",place:"鳴海探偵事務所",time:"2月20日 18:00",plate:"office58",ending:{t:"夜蜘蛛「女郎蜘蛛」",hint:"窓の影は、本当に家に災いを呼ぶものだったのか。"},s:`
+その日、屋根裏の古い道具は、すべて川原へ運ばれて燃やされた。
+長持も、行李も、文机も。糸車は、いちばん最後に火にくべられた。
+金色の糸が、炎の中で、細くまっすぐに燃え上がった。
+屋根裏の帳簿は、いつのまにか、どこにもなくなっていた。
+その夜から、ミシンは鳴らなくなった。窓の影も、二度と映らなかった。
+町の人たちは、これで女郎蜘蛛は退治されたと喜んだ。
+兄を名乗る男は、数日のうちに店を相続する書類に判を押し、権藤に店を売った。
+千鶴は、何も言わずに町を出ていった。
+縫いかけの背広は、左の袖がないまま、衣桁に残されていたそうだ。
+事務所に戻ると、電話は今日も鳴らなかった。
+外套のポケットに、丸まった紙が入っていた。あの朝、扉から剥がしたまま忘れていた紙だ。
+「事務員募集　帳簿ノ心得アル方」
+私はそれをしばらく眺めてから、屑籠に捨てた。
+どうしてか、もう誰も来ないような気がした。`});
+
+/* ---------- 第七章(真エンドのみ) ---------- */
+def("c7_0",{ch:"第七章 店じまい",place:"柚木洋装店",time:"3月30日 19:00",plate:"shop",track:"hope",s:`
+権藤は、タエを死なせたことを認めた。
+控えを取り返すつもりで店に上がりこみ、階段の上で揉み合ったのだという。受取の控えは、外套の内側から全部出てきた。
+沖野は、昔の件で一度は警察に呼ばれたが、正直に話したことが汲まれて、それ以上は咎められなかった。
+千鶴は、正一の戦死を、ようやく区役所に届け出た。十四年ぶりの、兄の葬式だった。
+三月の末、柚木洋装店は店を閉めることになった。
+この一帯は区画整理で道が広がり、店の土地もかかる。千鶴は、洋裁学校の先生の店に、住み込みで入ることを決めた。
+千鶴：一人で店を続けるには、私はまだ腕が足りませんから。いつか、自分の店を持ちます。
+千鶴は、縫い上がった背広を、丁寧にたたんで紙に包んだ。
+内ポケットの裏に、黒い角ボタンが一つ、縫い付けてあった。千鶴が、自分の手で付けたのだという。
+千鶴：兄の背広です。着る人はいないけれど、持っていきます。
+千鶴：……鳴海さん。二階の人に、お礼を言っておいてもらえますか。
+千鶴：私には、見えないみたいなので。
+千鶴は、二階に湯呑みを一つ置いて、店を出ていった。`,next:"c7_1"});
+def("c7_1",{ch:"第七章 店じまい",place:"柚木洋装店 屋根裏",time:"3月30日 23:40",plate:"atticnight",track:"silk",s:`
+その夜、私は最後にもう一度、屋根裏に上がった。
+女は、糸車の前に座っていた。車は、止まっていた。
+二階の人：明日、千鶴さんが鍵を返して、この家には誰も住まなくなります。
+二階の人：住む人のいない家に、私は居られません。そういうものなので。
+鳴海：どこへ行くんです。
+二階の人：わかりません。家がなくなった家の者が、どこへ行くのか。帳簿に書いてありませんでしたから。
+女は、文机の上の帳簿を閉じた。表紙の角は、何十年もめくられて、丸くなっていた。
+二階の人：帳簿は、ここで締めます。最後の行は、書いておきました。
+「三月三十日　店ジマイ　残高ナシ」
+私は、しばらく黙っていた。それから、外套のポケットに手を入れた。
+指先に、紙が触れた。あの朝、事務所の扉から剥がして、押しこんだままになっていた紙だ。日に焼けて、角が丸まっている。
+「事務員募集　帳簿ノ心得アル方」
+鳴海：よければ、うちに来るといい。
+鳴海：ちょうど、事務員を募集していたんだ。
+女は、紙をじっと見つめた。
+二階の人：……私は、家に憑くものです。人のところへは、行けません。
+鳴海：うちは事務所だが、帰ってくる者がいる場所なら、家のようなものだろう。
+鳴海：仕事柄、何日も空けることはある。毎日とはいかない。
+鳴海：だが、必ず帰る。帰ったときに帳簿がついていると、ありがたい。
+女は、算盤の珠を一つ、指で弾いた。
+二階の人：帳簿は、つけられます。
+二階の人：領収書は、ちゃんと出していただけますか。
+鳴海：努力しよう。
+二階の人：努力では困ります。
+女は、少しだけ笑った。それから、糸車の糸巻きから、一本の糸を切り取った。
+二階の人：これは、置いていきます。この家の分です。
+私は、その糸を手帳に挟んだ。
+鳴海：名前がいるな。
+鳴海：考えておこう。`,next:"epi"});
+
+/* ---------- エピローグ(真エンドのみ) ---------- */
+def("epi",{ch:"エピローグ 別架",place:"鳴海探偵事務所",time:"4月2日 16:30",plate:"office",track:"office",ending:{t:"真「キキーモラ」"},s:`
+依頼のない午後は、棚の整理をすることにしている。
+雑居ビルの三階、鳴海探偵事務所。このビルも、すっかり古くなった。廊下の塗料の匂いがしたのは、ずいぶん昔のことだ。
+私は、事務所の奥の書棚の前に立っていた。
+別架は三つある。三号には、今の鳴海さんが持ち帰った、どの分類にも入らない事件。二号には、その父親の代の記録。
+そして、いちばん古い棚が、一号。
+一号の最初の段から、私は茶封筒を一つ取り出していた。
+封筒の中には、和紙を綴じた古い帳簿の写しと、日に焼けた一枚の貼り紙が入っている。
+「事務員募集　帳簿ノ心得アル方」
+貼り紙の折り目に、細い糸が一本、挟まっていた。もう金色はほとんど残っていないけれど、引いても、まだ切れない。
+封筒の表の字は、私のものではない。大きくて、少し右に傾いた、あの人の字だ。
+「キキーモラ」「別架1号　File No.1001」
+異国の、家に棲む精の名前だそうだ。夜に糸を紡ぎ、家の者が眠っているあいだに仕事を片づける。家が荒れれば、出ていってしまう。
+あの人は、こういう本ばかり読んでいた。
+!se door
+事務所のドアが開いた。
+鳴海：ただいま。
+律：おかえりなさい、鳴海さん。
+鳴海さんは外套を脱いで、私の手元の封筒に目をとめた。
+鳴海：何を見ていたんだ。
+律：あなたのお爺さんのことを、思い出していました。
+鳴海さんは、少しのあいだ私の顔を見ていた。この人は子どものころから、ずっとこの事務所に出入りしている。そのあいだ、私の顔は一度も変わっていない。
+それでも、この人は何も聞かない。お父さまも、そうだった。
+鳴海：そうか。
+それだけ言って、鳴海さんは自分の机に鞄を置いた。
+私は封筒を、別架1号のいちばん最初の段に戻した。隣のFile No.1002と、背をそろえる。
+別架に移したものは、1001から番号を振る。あの人が決めて、私が守ってきた決まりだ。
+律：それで、鳴海さん。先週の出張の領収書を、まだいただいていません。
+鳴海：……今、出すよ。
+律：精算は、帰ってから三日以内とお願いしています。
+鳴海：知ってる。祖父の代からの決まりなんだろう。
+律：はい。努力では困ります、と申し上げましたから。
+鳴海さんは、怪訝な顔をした。私は、何も説明しなかった。
+湯呑みを二つ出して、自分の机に戻る。
+万年筆のキャップを外して、帳簿を開く前に、私は電卓の上で、指を一度だけ弾いた。`});
+
+/* ============================================================
+   音 (Web Audio で生成。外部ファイルなし)
+   ============================================================ */
+const Snd=(()=>{
+  let ac=null, master=null, buses=null, noiseBuf=null, inst=null, pending="night", timer=null;
+  const vol={bgm:0.5,se:0.7};
+  try{ const v=JSON.parse(localStorage.getItem("bekka-x-vol")||"null"); if(v&&typeof v.bgm==="number"){ vol.bgm=v.bgm; vol.se=v.se; } }catch(e){}
+  const mtof=m=>440*Math.pow(2,(m-69)/12);
+
+  /* 曲: ch=[ベース, 和音...] / bpc=1和音の拍数 / mel=[[拍,音]] / tick=時計の音 / beat=鼓動
+     breath=湖の寝息(長く吸って短く吐く) / bell=おりん */
+  const TR={
+    /* 前作からの流用 */
+    town:{bpm:58,bpc:8,pad:0.034,ch:[[38,53,57,60,64],[34,50,53,57,62],[31,50,53,57,58],[33,50,52,55,57]],
+      mel:[[[1,81],[3.5,77],[6,74]],[[2,77],[5,79]],[[0.5,74],[3,81],[4.5,79],[7,77]],[[2,76],[6,74]]]},
+    think:{bpm:66,bpc:8,pad:0.03,tick:0.012,ch:[[36,55,62,63],[32,55,60,62],[29,53,56,60,63],[31,50,55,59,62]],
+      mel:[[[3,75],[6,74]],[[2,72],[5.5,67]],[[1,68],[4,72]],[[2,71],[6,74]]]},
+    clock:{bpm:60,bpc:8,pad:0.026,tick:0.022,ch:[[33,52,55,59,62],[29,52,57,60,64],[31,50,55,59,62],[28,52,55,59,62]],
+      mel:[[[2,76]],[[4,72]],[[1,74],[5,79]],[[3,71]]]},
+    hope:{bpm:56,bpc:8,pad:0.034,ch:[[29,53,57,60,64],[28,55,60,64,67],[26,53,57,60,62],[34,50,53,57,62]],
+      mel:[[[0,72],[2,76],[4,74]],[[1,67],[4,72]],[[0,69],[3,72],[6,74]],[[2,72],[5,69]]]},
+    office:{bpm:76,bpc:8,pad:0.028,ch:[[29,57,60,64,67],[28,55,59,62,64],[26,53,57,60,64],[31,53,57,59,64]],
+      mel:[[[0.5,76],[1.5,79],[3,84],[5.5,81]],[[1,79],[2.5,76],[4,74]],[[0,77],[1.5,81],[3,84],[4.5,86],[6,84]],[[1,83],[3.5,79],[6,74]]]},
+    night:{bpm:54,bpc:8,pad:0.04,ch:[[33,57,60,64],[29,57,60,65],[31,55,59,62],[28,56,59,64]],
+      mel:[[[1,76],[4,72],[6,74]],[[2,77],[5,76]],[[0.5,74],[3,71],[5.5,72]],[[2,68],[4,71],[6,76]]]},
+    dusk:{bpm:52,bpc:8,pad:0.032,ch:[[33,57,60,64,71],[29,57,60,64,65],[26,53,57,60,64],[28,57,59,62,64]],
+      mel:[[[2,76],[5,72]],[[3,69]],[[1,72],[4,71]],[[2,69]]]},
+    /* 新曲: 繭坂町の路地。ゆるい三拍子の、古い流行歌のような旋律 */
+    lane:{bpm:84,bpc:6,pad:0.03,ch:[[41,57,60,65],[38,57,62,65],[34,58,62,65],[36,55,60,64]],
+      mel:[[[0,72],[1,74],[2,77],[4,74]],[[0,72],[2,69],[3,67]],[[0,70],[1,72],[2,74],[4,77]],[[0,76],[2,72],[4,67]]]},
+    /* 新曲: 屋根裏の糸車。三拍子の糸車の音に、細い旋律がからむ */
+    silk:{bpm:66,bpc:6,pad:0.03,wheel:0.02,ch:[[38,57,62,65],[34,58,62,65],[36,55,60,64],[33,57,61,64]],
+      mel:[[[0,74],[1.5,77],[3,81],[4.5,79]],[[0,77],[2,74]],[[0,72],[1.5,76],[3,79],[4.5,77]],[[0,76],[2,73],[4,69]]]},
+    /* 新曲: 足踏みミシン。踏み板の拍子が刻まれる */
+    treadle:{bpm:72,bpc:8,pad:0.026,tick:0.016,ch:[[33,52,57,60,64],[29,53,57,60,65],[31,50,55,59,62],[28,52,56,59,64]],
+      mel:[[[1,76],[3,72]],[[2,77],[5,74]],[[1,74],[4,71]],[[2,68],[5,71]]]},
+    /* 前作の曲 */
+    lake:{bpm:48,bpc:8,pad:0.036,breath:0.05,ch:[[38,57,62,64,69],[36,55,60,64,67],[34,53,57,62,65],[33,52,57,61,64]],
+      mel:[[[2,74],[5,76]],[[3,72],[6.5,69]],[[1,69],[4.5,72]],[[2,76],[5.5,74]]]},
+    /* 新曲: 経念寺。五度の持続音に、おりんと低い読経のような旋律 */
+    chant:{bpm:60,bpc:8,pad:0.032,bell:0.03,ch:[[38,50,57,62],[38,50,57,60],[36,48,55,62],[38,50,57,62]],
+      mel:[[[2,62],[3,64],[4.5,62]],[[2,60],[3.5,62]],[[2,62],[4,57],[6,60]],[[2,64],[3,62],[4.5,60]]]},
+    /* 新曲: 湖の底。書付が読まれる場面から。寝息とおりんが重なる */
+    deep:{bpm:44,bpc:8,pad:0.034,breath:0.06,bell:0.022,ch:[[37,56,61,64,68],[33,57,61,64,69],[35,54,59,63,66],[32,56,59,63,68]],
+      mel:[[[3,73]],[[5,76]],[[2,71],[5,68]],[[4,68]]]}
+  };
+
+  function impulse(sec){ const len=Math.floor(ac.sampleRate*sec), b=ac.createBuffer(2,len,ac.sampleRate);
+    for(let c=0;c<2;c++){ const d=b.getChannelData(c); for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.8); } return b; }
+  function bus(level){
+    const dry=ac.createGain(); dry.gain.value=level; dry.connect(master);
+    const wet=ac.createConvolver(); wet.buffer=impulse(3.4); const wg=ac.createGain(); wg.gain.value=0.5; wet.connect(wg); wg.connect(dry);
+    return {dry,wet};
+  }
+  function init(){
+    if(ac){ if(ac.state!=="running") ac.resume().catch(()=>{}); return; }
+    const C=window.AudioContext||window.webkitAudioContext; if(!C) return;
+    try{ ac=new C(); }catch(e){ ac=null; return; }
+    master=ac.createGain(); master.gain.value=0.9;
+    const comp=ac.createDynamicsCompressor(); comp.threshold.value=-18; master.connect(comp); comp.connect(ac.destination);
+    buses={bgm:bus(vol.bgm*0.9), se:bus(vol.se*0.7)};
+    noiseBuf=ac.createBuffer(1,ac.sampleRate,ac.sampleRate); const nd=noiseBuf.getChannelData(0); for(let i=0;i<nd.length;i++) nd[i]=Math.random()*2-1;
+    timer=setInterval(pump,200);
+    if(pending){ const p=pending; pending=null; play(p); }
+  }
+  function out(node,b,wet,dest){ if(dest){ node.connect(dest); return; } node.connect(b.dry); if(wet){ const w=ac.createGain(); w.gain.value=wet; node.connect(w); w.connect(b.wet); } }
+  function tone(t,o){
+    const b=buses[o.bus||"se"]; const osc=ac.createOscillator(); osc.type=o.type||"sine"; osc.frequency.setValueAtTime(o.f,t);
+    if(o.f2) osc.frequency.exponentialRampToValueAtTime(o.f2,t+(o.a||0.005)+(o.d||1));
+    const e=ac.createGain(), a=o.a||0.005, d=o.d||1;
+    e.gain.setValueAtTime(0,t); e.gain.linearRampToValueAtTime(o.g,t+a); e.gain.exponentialRampToValueAtTime(0.0001,t+a+d);
+    let n=osc; if(o.lp){ const fl=ac.createBiquadFilter(); fl.type="lowpass"; fl.frequency.value=o.lp; osc.connect(fl); n=fl; }
+    n.connect(e); out(e,b,o.wet,o.dest); osc.start(t); osc.stop(t+a+d+0.05);
+  }
+  function noise(t,o){
+    const b=buses[o.bus||"se"]; const s=ac.createBufferSource(); s.buffer=noiseBuf;
+    const fl=ac.createBiquadFilter(); fl.type=o.ft||"bandpass"; fl.frequency.setValueAtTime(o.f,t); fl.Q.value=o.q||1;
+    if(o.f2) fl.frequency.exponentialRampToValueAtTime(o.f2,t+o.d);
+    const e=ac.createGain(); e.gain.setValueAtTime(0,t); e.gain.linearRampToValueAtTime(o.g,t+(o.a||0.002)); e.gain.exponentialRampToValueAtTime(0.0001,t+(o.a||0.002)+o.d);
+    s.connect(fl); fl.connect(e); out(e,b,o.wet,o.dest); s.start(t,Math.random()*0.5); s.stop(t+o.d+0.05);
+  }
+  /* 寝息: 長く吸って(70%)、短く吐く。ノイズを繰り返し鳴らすので、必ず止める時刻を決めておく */
+  function breath(t,len,g,dest){
+    const s=ac.createBufferSource(); s.buffer=noiseBuf; s.loop=true;
+    const fl=ac.createBiquadFilter(); fl.type="lowpass"; fl.Q.value=0.7;
+    fl.frequency.setValueAtTime(240,t); fl.frequency.linearRampToValueAtTime(1100,t+len*0.7); fl.frequency.linearRampToValueAtTime(240,t+len*0.97);
+    const e=ac.createGain(); e.gain.setValueAtTime(0,t); e.gain.linearRampToValueAtTime(g,t+len*0.7); e.gain.linearRampToValueAtTime(0,t+len*0.97);
+    s.connect(fl); fl.connect(e); e.connect(dest); s.start(t,Math.random()*0.5); s.stop(t+len);
+  }
+  function rin(t,f,g,dest){
+    [[1,1,5.5],[2.76,0.4,3],[5.4,0.18,1.6]].forEach(([r,k,d])=>tone(t,{bus:dest?"bgm":"se",f:f*r,g:g*k,a:0.003,d,wet:0.8,dest}));
+  }
+  function pad(t,f,len,g,dest){
+    for(const dt of [-7,7]){
+      const o=ac.createOscillator(); o.type="triangle"; o.frequency.value=f; o.detune.value=dt;
+      const fl=ac.createBiquadFilter(); fl.type="lowpass"; fl.frequency.value=1100;
+      const e=ac.createGain(); e.gain.setValueAtTime(0,t); e.gain.linearRampToValueAtTime(g,t+len*0.3); e.gain.linearRampToValueAtTime(g*0.75,t+len*0.85); e.gain.linearRampToValueAtTime(0,t+len+0.8);
+      o.connect(fl); fl.connect(e); out(e,buses.bgm,0.6,dest); o.start(t); o.stop(t+len+0.9);
+    }
+  }
+  /* 寝息の曲の和音は、吸う息に合わせてゆっくりふくらみ、吐く息で短く引く */
+  function swellPad(t,f,len,g,dest){
+    for(const dt of [-6,6]){
+      const o=ac.createOscillator(); o.type="triangle"; o.frequency.value=f; o.detune.value=dt;
+      const fl=ac.createBiquadFilter(); fl.type="lowpass"; fl.frequency.value=1200;
+      const e=ac.createGain(); e.gain.setValueAtTime(0,t); e.gain.linearRampToValueAtTime(g,t+len*0.7); e.gain.linearRampToValueAtTime(g*0.35,t+len*0.97); e.gain.linearRampToValueAtTime(0,t+len+0.6);
+      o.connect(fl); fl.connect(e); out(e,buses.bgm,0.6,dest); o.start(t); o.stop(t+len+0.7);
+    }
+  }
+
+  /* BGM */
+  function schedChord(it,t){
+    const tr=it.tr, beat=60/tr.bpm, len=tr.bpc*beat, c=tr.ch[it.ci%tr.ch.length], m=tr.mel[it.ci%tr.mel.length];
+    tone(t,{bus:"bgm",f:mtof(c[0]),g:0.07,a:0.6,d:len,lp:300,dest:it.g}); tone(t,{bus:"bgm",f:mtof(c[0]+12),g:0.03,a:0.6,d:len,lp:700,dest:it.g});
+    c.slice(1).forEach(n=>(tr.breath?swellPad:pad)(t,mtof(n),len,tr.pad,it.g));
+    m.forEach(([b,n])=>{ const tt=t+b*beat; tone(tt,{bus:"bgm",f:mtof(n),g:0.06,a:0.004,d:2.6,wet:0.7,dest:it.g}); tone(tt,{bus:"bgm",f:mtof(n)*2,g:0.012,a:0.004,d:1.2,wet:0.7,dest:it.g}); });
+    if(tr.tick) for(let k=0;k<tr.bpc;k++) noise(t+k*beat,{bus:"bgm",f:k%2?3200:2600,q:6,g:tr.tick,d:0.03,dest:it.g});
+    if(tr.beat) for(let k=0;k<tr.bpc;k+=2){ tone(t+k*beat,{bus:"bgm",f:58,f2:42,g:0.12,d:0.25,dest:it.g}); tone(t+k*beat+0.28,{bus:"bgm",f:52,f2:40,g:0.07,d:0.25,dest:it.g}); }
+    if(tr.breath) breath(t,len,tr.breath,it.g);
+    if(tr.bell && it.ci%2===0) rin(t+0.02,mtof(81),tr.bell,it.g);
+    if(tr.wheel) for(let k=0;k<tr.bpc;k++){ noise(t+k*beat,{bus:"bgm",ft:"bandpass",f:k%3?900:600,q:2,g:tr.wheel*(k%3?0.6:1),d:0.18,a:0.04,dest:it.g}); }
+  }
+  function pump(){
+    if(!ac||!inst) return;
+    const now=ac.currentTime;
+    if(inst.next<now-0.2) inst.next=now+0.05;   /* スリープ明けに、止まっていたぶんをまとめて鳴らさない */
+    while(inst.next<now+0.6){ schedChord(inst,inst.next); inst.next+=inst.tr.bpc*60/inst.tr.bpm; inst.ci++; }
+  }
+  function play(name){
+    if(!ac){ pending=name; return; }
+    if(inst&&inst.name===name) return;
+    const now=ac.currentTime;
+    const FADE=1.0; let start=now+0.1;
+    /* 前の曲は1秒で消し切り、出口ごと切り離す(残響も含めて鳴り残らない) */
+    if(inst){ const old=inst.g, ow=inst.gw; old.gain.cancelScheduledValues(now); old.gain.setValueAtTime(old.gain.value,now); old.gain.linearRampToValueAtTime(0,now+FADE);
+      setTimeout(()=>{ try{ old.disconnect(); ow.disconnect(); }catch(e){} },FADE*1000+150); start=now+FADE; }
+    if(!name||!TR[name]){ inst=null; return; }
+    const g=ac.createGain(); g.gain.setValueAtTime(0,now); g.gain.setValueAtTime(0,start); g.gain.linearRampToValueAtTime(1,start+1.2); g.connect(buses.bgm.dry);
+    const gw=ac.createGain(); gw.gain.value=0.6; g.connect(gw); gw.connect(buses.bgm.wet);
+    inst={name,tr:TR[name],g,gw,ci:0,next:start};
+    pump();
+  }
+
+  /* 効果音 */
+  const SE={
+    tick:t=>noise(t,{f:2400,q:3,g:0.035,d:0.025}),
+    pick:t=>tone(t,{f:1046,g:0.03,d:0.18,wet:0.3}),
+    get:t=>{ tone(t,{f:1318.5,g:0.05,d:1.4,wet:0.6}); tone(t+0.13,{f:1975.5,g:0.04,d:1.8,wet:0.6}); },
+    ok:t=>{ [784,987.8,1174.7].forEach((f,i)=>tone(t+i*0.09,{f,g:0.04,d:1.3,wet:0.6})); },
+    ng:t=>{ tone(t,{f:150,f2:84,g:0.16,d:0.32,lp:500}); noise(t,{ft:"lowpass",f:300,g:0.05,d:0.12}); },
+    card:t=>{ [[196,0.07,3.2],[540.9,0.025,2],[1058,0.01,1.2]].forEach(([f,g,d])=>tone(t,{f,g,d,a:0.003,wet:0.8})); },
+    open:t=>noise(t,{f:700,f2:1900,q:1.2,g:0.03,d:0.16,a:0.03}),
+    thud:t=>{ tone(t,{f:90,f2:45,g:0.2,d:0.35,lp:300}); noise(t,{ft:"lowpass",f:400,g:0.09,d:0.18}); },
+    bell:t=>rin(t,mtof(81),0.06),
+    sew:t=>{ for(let i=0;i<12;i++){ const tt=t+i*0.14; noise(tt,{f:1900,q:5,g:0.035,d:0.04}); if(i%2===0) tone(tt,{f:110,f2:80,g:0.05,d:0.09,lp:400}); } },
+    spin:t=>{ for(let i=0;i<6;i++) noise(t+i*0.22,{ft:"bandpass",f:700,f2:1100,q:2,g:0.04,d:0.2,a:0.05,wet:0.4}); },
+    door:t=>{ for(let i=0;i<5;i++) noise(t+i*0.045+Math.random()*0.02,{f:3000+i*200,q:6,g:0.03,d:0.05}); noise(t,{ft:"lowpass",f:600,g:0.05,d:0.25,a:0.02}); },
+    thread:t=>{ tone(t,{f:1567,f2:1760,g:0.025,d:0.6,wet:0.7}); }
+  };
+  function se(name){ if(!ac||!SE[name]||vol.se<=0) return; if(ac.state!=="running") ac.resume().catch(()=>{}); SE[name](ac.currentTime+0.01); }
+
+  function setVol(kind,v){
+    vol[kind]=v;
+    try{ localStorage.setItem("bekka-x-vol",JSON.stringify(vol)); }catch(e){}
+    if(ac&&buses){ buses[kind].dry.gain.setTargetAtTime(v*(kind==="bgm"?0.9:0.7),ac.currentTime,0.05); }
+  }
+  document.addEventListener("visibilitychange",()=>{ if(!ac) return; if(document.hidden) ac.suspend().catch(()=>{}); else ac.resume().catch(()=>{}); });
+  function restart(){
+    const name=inst?inst.name:(pending||"night");
+    try{ clearInterval(timer); if(ac) ac.close(); }catch(e){}
+    ac=null; inst=null; buses=null; pending=name; init();
+  }
+  function state(){ return ac?ac.state:"none"; }
+  function current(){ return inst?inst.name:pending; }
+  return {init,play,se,setVol,vol,restart,state,current,TR};
+})();
+["pointerdown","pointerup","touchend","click","keydown"].forEach(ev=>addEventListener(ev,()=>Snd.init(),{capture:true}));
+/* 曲は章ごとに一つ。問いやミニゲームでは切り替えない。
+   章の途中で変えるのは、屋根裏で二階の人と会う場面、沖野が名乗り直してからだけ */
+const CH_TRACK={"序章":"night","第一章":"town","第二章":"lane","第三章":"lane","第四章":"clock","第五章":"treadle","第六章":"think","第七章":"hope"};
+function trackFor(n,id){
+  if(n.track) return n.track;
+  if(n.ending) return n.ending.t.startsWith("真")?"office":"dusk";
+  if(n.plate==="office") return "office";
+  return CH_TRACK[(n.ch||"").split(" ")[0]]||"town";
+}
+
+/* ============================================================
+   状態
+   ============================================================ */
+const S = {flags:new Set(), ev:new Set(), clock:0, miss:0};
+let cur = null, lastCh = null, run = 0, cp = null, choiceCp = null, inGame = false;
+const logLines = [];
+const $ = s => document.querySelector(s);
+const stage = $("#stage");
+const has = f => S.flags.has(f);
+
+/* ============================================================
+   合言葉 (75bit: 版3 / 場面9 / フラグ32 / 証拠14 / 予備3 / 誤答4 / 検査10)
+   ============================================================ */
+const ALPHA = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const KEY = 0x5C83_1EA7_9D46n * 0x2E95n ^ 0x6B10_F3C8_47A2_D59Bn;
+const MASK75 = (1n<<75n)-1n;
+function chk(v){ let h=0x2A7; let x=v; for(let i=0;i<9;i++){ h=((h*131)+Number(x&0xFFn)+i*7)%1021; x>>=8n; } return BigInt(h); }
+function encode(c){
+  let v=0n; const push=(b,n)=>{ v=(v<<BigInt(n))|BigInt(b); };
+  let fm=0n; c.flags.forEach(f=>{ const i=FLAGS.indexOf(f); if(i>=0) fm|=1n<<BigInt(i); });
+  let em=0; c.ev.forEach(e=>{ const i=EV_ORDER.indexOf(e); if(i>=0) em|=1<<i; });
+  push(1,3); push(ORDER.indexOf(c.node),9); v=(v<<32n)|fm; push(em,14); push(0,3); push(Math.min(15,c.miss),4);
+  v=(v<<10n)|chk(v);
+  v=(v^KEY)&MASK75;
+  let s=""; for(let i=14;i>=0;i--){ s+=ALPHA[Number((v>>BigInt(i*5))&31n)]; }
+  return s.slice(0,5)+"-"+s.slice(5,10)+"-"+s.slice(10);
+}
+function decode(str){
+  const s=(str||"").toUpperCase().replace(/[\s\-ー－]/g,"");
+  if(s.length!==15) return {err:"合言葉は15文字です(区切りの「-」は入れても入れなくてもかまいません)。"};
+  let v=0n;
+  for(const ch of s){ const i=ALPHA.indexOf(ch); if(i<0) return {err:"「"+ch+"」は合言葉に使われない文字です。0・1・I・O は含まれません。"}; v=(v<<5n)|BigInt(i); }
+  v=(v^KEY)&MASK75;
+  const h=v&1023n; const body=v>>10n;
+  if(chk(body)!==h) return {err:"合言葉が正しくありません。もう一度見比べてください。"};
+  let b=body; const pop=n=>{ const r=b&((1n<<BigInt(n))-1n); b>>=BigInt(n); return r; };
+  const miss=Number(pop(4)), pad=Number(pop(3)), em=Number(pop(14)), fm=pop(32), node=Number(pop(9)), ver=Number(pop(3)); const clock=0;
+  if(ver!==1||pad!==0||node>=ORDER.length) return {err:"この合言葉は使えません。"};
+  const flags=new Set(); FLAGS.forEach((f,i)=>{ if((fm>>BigInt(i))&1n) flags.add(f); });
+  const ev=new Set(); EV_ORDER.forEach((e,i)=>{ if((em>>i)&1) ev.add(e); });
+  return {node:ORDER[node],flags,ev,clock,miss};
+}
+
+/* ============================================================
+   画面まわり
+   ============================================================ */
+const CLOCK0=0, CLOCK_LIMIT=0;
+function hhmm(min){ return ""; }
+function nodeTime(n){ return n.time; }
+function setHeader(n){
+  $("#hCh").textContent=n.ch||""; $("#hPl").textContent=n.place||""; $("#hTm").textContent=nodeTime(n);
+}
+function toast(msg){
+  const t=document.createElement("div"); t.className="toast"; t.textContent=msg; document.body.appendChild(t);
+  setTimeout(()=>t.remove(),2400);
+}
+function el(tag,cls,html){ const e=document.createElement(tag); if(cls) e.className=cls; if(html!=null) e.innerHTML=html; return e; }
+function esc(s){ return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+function parse(src){
+  if(!src) return [];
+  const re=new RegExp("^("+SPEAKERS.join("|")+")：(.*)$");
+  return src.split("\n").map(l=>l.trim()).filter(Boolean).map(l=>{
+    if(l.startsWith("!get ")) return {cmd:"get",arg:l.slice(5).trim()};
+    if(l.startsWith("!set ")) return {cmd:"set",arg:l.slice(5).trim()};
+    if(l.startsWith("!se ")) return {cmd:"se",arg:l.slice(4).trim()};
+    let cond=null;
+    if(l.startsWith("?")){ const m=l.match(/^\?(!?)(\w+)\s+(.*)$/); cond={neg:m[1]==="!",f:m[2]}; l=m[3]; }
+    const m=l.match(re);
+    return {sp:m?m[1]:null,text:m?m[2]:l,cond};
+  });
+}
+
+/* テキストボックス */
+let waiter=null;
+function makeBox(){ const b=el("div","box"); b.innerHTML='<div class="sp"></div><div class="tx"></div><div class="more">▼</div>'; b.tabIndex=0; b.setAttribute("role","button"); b.setAttribute("aria-label","文章を送る"); b.addEventListener("click",advance); return b; }
+function showLine(box,line){
+  return new Promise(res=>{
+    const sp=box.querySelector(".sp"), tx=box.querySelector(".tx");
+    box.classList.remove("ready","static");
+    sp.textContent=line.sp||"";
+    const full=line.sp?"「"+line.text+"」":line.text;
+    logLines.push(line); if(logLines.length>300) logLines.shift();
+    const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let i=0; tx.textContent="";
+    const w={typing:!reduce,res};
+    const finish=()=>{ clearInterval(timer); tx.textContent=full; box.classList.add("ready"); w.typing=false; };
+    w.finish=finish;
+    const timer=reduce?null:setInterval(()=>{ if(!box.isConnected){ clearInterval(timer); return; } i+=2; tx.textContent=full.slice(0,i); if(i>=full.length) finish(); },28);
+    waiter=w;
+    if(reduce){ tx.textContent=full; box.classList.add("ready"); }
+  });
+}
+function advance(){
+  if(!waiter) return;
+  if(waiter.typing){ waiter.finish(); return; }
+  const r=waiter.res; waiter=null; Snd.se("tick"); r();
+}
+function staticBox(box,text,sp){
+  box.classList.remove("ready"); box.classList.add("static");
+  box.querySelector(".sp").textContent=sp||""; box.querySelector(".tx").textContent=text;
+}
+
+async function playLines(lines,box,token){
+  for(const l of lines){
+    if(token!==run) return false;
+    if(l.cmd==="get"){ if(!S.ev.has(l.arg)){ S.ev.add(l.arg); Snd.se("get"); toast("手帳に記録した:「"+EVIDENCE[l.arg].n+"」"); } continue; }
+    if(l.cmd==="set"){ S.flags.add(l.arg); continue; }
+    if(l.cmd==="se"){ Snd.se(l.arg); continue; }
+    if(l.cond){ const v=has(l.cond.f); if(l.cond.neg?v:!v) continue; }
+    await showLine(box,l);
+  }
+  return token===run;
+}
+
+/* 章タイトル */
+function chapterCard(ch){
+  return new Promise(res=>{
+    const parts=ch.split(" "); const c=el("div",null);
+    c.id="card"; c.innerHTML='<div class="k">'+esc(parts[0])+'</div><div class="t">'+esc(parts.slice(1).join(" ")||parts[0])+'</div>';
+    document.body.appendChild(c); Snd.se("card");
+    const done=()=>{ if(!c.isConnected) return; c.remove(); res(); };
+    c.addEventListener("click",done); setTimeout(done,2200);
+  });
+}
+
+/* ============================================================
+   進行
+   ============================================================ */
+function snapshot(id){ return {node:id,flags:new Set(S.flags),ev:new Set(S.ev),clock:S.clock,miss:S.miss}; }
+async function enter(id){
+  const n=N[id]; if(!n){ console.error("missing node",id); return; }
+  const token=++run; cur=id; waiter=null;
+  cp=snapshot(id);
+  setHeader(n); Snd.play(trackFor(n,id));
+  stage.innerHTML="";
+  drawPlate(n.plate,timeOf(nodeTime(n)));
+  const chKey=n.ch;
+  if(chKey!==lastCh && chKey!=="結末"){ lastCh=chKey; await chapterCard(chKey); if(token!==run) return; }
+  lastCh=chKey;
+  if(n.hub) return renderHub(n,token);
+  if(n.mini) return renderMini(n,token);
+  const box=makeBox(); stage.appendChild(box); box.focus({preventScroll:true});
+  const ok=await playLines(parse(n.s),box,token); if(!ok) return;
+  if(n.ask) return renderAsk(n,box,token);
+  if(n.quiz) return renderQuiz(n.quiz,box,token,()=>enter(n.quiz.ok));
+  if(n.choices) return renderChoices(n,box,token);
+  if(n.ending) return renderEnding(n,box);
+  enter(n.next);
+}
+
+/* 調査ハブ */
+async function renderHub(n,token){
+  const box=makeBox(); stage.appendChild(box);
+  if(!has(n.hubFlag)){
+    S.flags.add(n.hubFlag);
+    const ok=await playLines(parse(n.intro),box,token); if(!ok) return;
+  }
+  const h=n.hub, allDone=h.need.every(has);
+  staticBox(box, allDone ? "調べるべきことは調べた。気になることが残っていれば、まだ回れる。" : "どこを調べるか。");
+  const p=el("div","panel");
+  if(n.clockHub){
+    const left=CLOCK_LIMIT-S.clock;
+    p.appendChild(el("div","clock",'<span>現在 <b>'+hhmm(S.clock)+'</b></span><span>16:00まで '+left+'分</span>'));
+  }
+  h.points.forEach(pt=>{
+    if(pt.req && !pt.req.every(has)) return;
+    const done=has(pt.f);
+    const b=el("button","row"+(done?" done":""));
+    let costTxt="", disabled=false, why="";
+    if(n.clockHub){
+      const left=CLOCK_LIMIT-S.clock;
+      if(done){ disabled=true; }
+      else if(pt.cost>left){ disabled=true; why="時間が足りない"; }
+      else { const reqLeft=h.need.filter(f=>!has(f)&&f!==pt.f).reduce((a,f)=>a+((h.points.find(q=>q.f===f)||{}).cost||0),0); if(left-pt.cost<reqLeft){ disabled=true; why="先に回るべき場所がある"; } }
+      costTxt=done?"":(why||pt.cost+"分");
+    }
+    b.innerHTML='<span class="mk">'+(done?"済":"・")+'</span><span class="lb">'+esc(pt.t)+'</span>'+(costTxt?'<span class="cost">'+esc(costTxt)+'</span>':"");
+    b.disabled=disabled;
+    b.addEventListener("click",()=>{ Snd.se("pick"); if(n.clockHub) S.clock+=pt.cost; enter(pt.go); });
+    p.appendChild(b);
+  });
+  if(allDone){
+    const b=el("button","row exit",'<span class="mk">→</span><span class="lb">'+esc(h.exitT)+'</span>');
+    b.addEventListener("click",()=>{ Snd.se("pick"); if(n.clockHub) S.clock=CLOCK_LIMIT; enter(h.exit); });
+    p.appendChild(b);
+  }else if(n.clockHub){
+  }
+  stage.appendChild(p);
+}
+
+/* つきつける */
+function renderAsk(n,box,token){
+  const a=n.ask;
+  staticBox(box,a.q);
+  const p=el("div","panel");
+  const b=el("button","row exit",'<span class="mk">⌕</span><span class="lb">手帳を開いて、証拠をつきつける</span>');
+  b.addEventListener("click",()=>openNote(async key=>{
+    closeOv();
+    if(a.accept.includes(key)){ Snd.se("ok"); enter(a.ok); return; }
+    Snd.se("ng"); S.miss++; p.remove();
+    const ng=parse(a.ng)[0];
+    await showLine(box,ng); if(token!==run) return;
+    renderAsk(n,box,token);
+  }));
+  p.appendChild(b); stage.appendChild(p);
+}
+function renderQuiz(q,box,token,onOk){
+  staticBox(box,q.q);
+  const p=el("div","panel");
+  q.opts.forEach(o=>{
+    const b=el("button","row",'<span class="mk">・</span><span class="lb">'+esc(o.t)+'</span>');
+    b.addEventListener("click",async()=>{
+      if(o.ok){ Snd.se("ok"); onOk(); return; }
+      Snd.se("ng"); S.miss++; p.remove();
+      await showLine(box,parse(o.ng)[0]); if(token!==run) return;
+      renderQuiz(q,box,token,onOk);
+    });
+    p.appendChild(b);
+  });
+  stage.appendChild(p);
+}
+function renderChoices(n,box){
+  box.classList.add("static"); box.classList.remove("ready");
+  const p=el("div","panel");
+  n.choices.forEach(c=>{
+    const b=el("button","row",'<span class="mk">・</span><span class="lb">'+esc(c.t)+'</span>');
+    b.addEventListener("click",()=>{ Snd.se("pick"); enter(typeof c.go==="function"?c.go():c.go); });
+    p.appendChild(b);
+  });
+  stage.appendChild(p);
+}
+function renderEnding(n,box){
+  if(n.ending.t.startsWith("真")) markCleared();
+  box.classList.add("static"); box.classList.remove("ready");
+  const e=el("div","end");
+  const got=EV_ORDER.filter(k=>S.ev.has(k)).length;
+  e.innerHTML='<p class="ek">結末</p><p class="et">'+esc(n.ending.t)+'</p>'+
+    '<p class="note">集めた証拠 '+got+' / '+EV_ORDER.length+' ・ 誤った指摘 '+S.miss+' 回</p>'+
+    (n.ending.hint?'<p class="note">ヒント: '+esc(n.ending.hint)+'</p>':'');
+  const row=el("div","tbtns");
+  const b1=el("button","btn sub","第三章から遊び直す合言葉を見る");
+  /* 第三章より前の調べはすべて必須なので、第三章のはじめの状態は一つに決まる */
+  const ch3={node:"c3_hub",flags:new Set(["h2","suit","box","oki"]),ev:new Set(["E1","E2","E3"]),clock:0,miss:S.miss};
+  b1.addEventListener("click",()=>showCode(ch3,"第三章の、町の噂を確かめて回る場面から再開できます。結末が変わることがあります。"));
+  const b2=el("button","btn","タイトルへ戻る");
+  b2.addEventListener("click",toTitle);
+  row.append(b1,b2); e.appendChild(row); stage.appendChild(e);
+}
+
+/* ============================================================
+   ミニゲーム
+   ============================================================ */
+function renderMini(n){
+  if(n.mini==="broadcast") return miniBroadcast(()=>enter(n.next));
+  if(n.mini==="window") return miniWindow(()=>enter(n.next));
+  if(n.mini==="ledger") return miniLedger(()=>enter(n.next));
+  if(n.mini==="measure") return miniMeasure(()=>enter(n.next));
+}
+function setupCanvas(cv){
+  const r=cv.getBoundingClientRect(), d=window.devicePixelRatio||1;
+  cv.width=Math.max(10,Math.round(r.width*d)); cv.height=Math.max(10,Math.round(r.height*d));
+  const ctx=cv.getContext("2d"); ctx.setTransform(d,0,0,d,0,0);
+  return {ctx,W:r.width,H:r.height};
+}
+const UIF=()=>getComputedStyle(document.body).getPropertyValue("--ui")||"sans-serif";
+const MONO=()=>getComputedStyle(document.body).getPropertyValue("--mono")||"monospace";
+const SERIF=()=>getComputedStyle(document.body).getPropertyValue("--serif")||"serif";
+function nextBtn(wrap,label,done){ const b=el("button","btn",label); b.onclick=()=>{ Snd.se("pick"); done(); }; wrap.appendChild(b); b.focus({preventScroll:true}); }
+
+/* ---------- 放送原稿の照合 ---------- */
+const BC_SHEETS=[
+  {k:"s1",n:"一枚目",t:"柚木正一。出征時十九歳。左ノ眉ノ上ニ、ホクロ一ツ。"},
+  {k:"s4",n:"四枚目",t:"口癖ハ「ソウダナア」。考エルトキ、必ズ言フ。"},
+  {k:"s7",n:"七枚目",t:"算盤ガ得意。暗算モ速シ。"},
+  {k:"s9",n:"九枚目",t:"魚ノ目玉ヲ嫌フ。焼キ魚ノ目ヲ、イツモ母ニ取ラセル。"},
+  {k:"s10",n:"十枚目",t:"母ハ待ツテヰマス。店ノ二階デ、待ツテヰマス。"}
+];
+const BC_ROWS=[
+  {t:"左の眉の上に、ほくろがある",a:"s1"},
+  {t:"「そうだなあ」と言ってから話す",a:"s4"},
+  {t:"算盤が得意だった",a:"s7"},
+  {t:"焼き魚の目玉が嫌いで、母に取ってもらっていた",a:"s9"},
+  {t:"出征の朝、母からボタンを一つもらった",a:"none"}
+];
+function miniBroadcast(done){
+  const wrap=el("div","mini");
+  wrap.appendChild(el("p","lead","尋ね人の原稿の控え(十年分)と、男の話を照らし合わせる。男の話は、どの年の原稿に書かれているか。"));
+  const sheets=el("div","q");
+  sheets.appendChild(el("p",null,"<b>原稿の控え</b>(抜き書き)"));
+  const ul=el("ul","tl");
+  BC_SHEETS.forEach(s=>ul.appendChild(el("li",null,'<span class="tm">'+esc(s.n)+'</span><span>'+esc(s.t)+'</span>')));
+  sheets.appendChild(ul); wrap.appendChild(sheets);
+  let ok=0;
+  BC_ROWS.forEach(r=>{
+    const q=el("div","q"); q.appendChild(el("p",null,"男の話:「"+esc(r.t)+"」"));
+    const seg=el("div","seg times five"); const fb=el("p","fb","");
+    [...BC_SHEETS.slice(0,4).map(s=>[s.k,s.n]),["none","どこにもない"]].forEach(([k,lb])=>{
+      const b=el("button",null,esc(lb)); b.type="button";
+      b.onclick=()=>{
+        if(q.dataset.ok) return;
+        if(k!==r.a){ Snd.se("ng"); S.miss++; fb.className="fb"; fb.textContent= r.a==="none" ? "その年の原稿には、そうは書かれていない。" : "その原稿には書かれていない。もう一度、控えを読み比べる。"; return; }
+        Snd.se("ok"); q.dataset.ok=1; seg.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));
+        fb.className="fb ok"; fb.textContent= k==="none" ? "十年分のどの原稿にも、ボタンの話は書かれていない。" : "放送で、全国に流れた話だ。";
+        if(++ok===BC_ROWS.length){ wrap.appendChild(el("p","fb ok","男の話のうち四つは、ラジオを聞いていれば誰でも知りえた。ボタンの話だけが、放送の外にある。")); nextBtn(wrap,"男の顔を見る",done); }
+      };
+      seg.appendChild(b);
+    });
+    q.append(seg,fb); wrap.appendChild(q);
+  });
+  stage.appendChild(wrap);
+}
+
+/* ---------- 窓の高さ ----------
+   横から見た図。単位はメートル。x=0 が煙草屋の帳場、x=4.2 が洋装店の表。
+   洋装店の店先の看板の庇は x=2.4〜4.2、高さ3.2。二階の窓 3.4〜4.4、屋根裏の窓 6.0〜6.8。 */
+const WIN={eave:{x0:2.4,x1:4.2,h:3.2},w2:[3.4,4.4],w3:[6.0,6.8],face:4.2};
+const EYES={sit:{x:0.2,h:1.3,lb:"帳場に座る"},stand:{x:0.2,h:2.1,lb:"帳場で立ち上がる"}};
+function visibleSpan(eye,lo,hi){
+  /* 窓の中で、庇にさえぎられずに見える高さの範囲(なければnull) */
+  const ok=v=>{ const t=(WIN.eave.h-eye.h)/(v-eye.h); const xc=eye.x+t*(WIN.face-eye.x); return !(v>eye.h && xc>=WIN.eave.x0 && xc<=WIN.eave.x1); };
+  let a=null,b=null; for(let i=0;i<=40;i++){ const v=lo+(hi-lo)*i/40; if(ok(v)){ if(a===null) a=v; b=v; } }
+  return a===null?null:[a,b];
+}
+function miniWindow(done){
+  const wrap=el("div","mini");
+  wrap.appendChild(el("p","lead","煙草屋の帳場から、向かいの洋装店を見上げる。目の高さを変えて、どの窓が見えるか確かめる。"));
+  const view=el("div","viewer side"); const cv=el("canvas"); view.appendChild(cv); wrap.appendChild(view);
+  const seg=el("div","seg"); let eye="sit";
+  Object.entries(EYES).forEach(([k,e])=>{ const b=el("button",k===eye?"on":"",esc(e.lb)); b.type="button"; b.onclick=()=>{ eye=k; seg.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b)); Snd.se("pick"); paint(); }; seg.appendChild(b); });
+  wrap.appendChild(seg);
+  const q=el("div","q"); q.appendChild(el("p",null,"いつものように帳場に座ったキヨの目に、明かりのついた窓として見えるのはどれか。"));
+  const fb=el("p","fb","");
+  [["w2","二階の作業場の窓"],["w3","屋根裏の窓"],["both","どちらも見える"]].forEach(([k,lb])=>{
+    const b=el("button","opt",esc(lb)); b.type="button";
+    b.onclick=()=>{
+      if(q.dataset.ok) return;
+      if(k!=="w3"){ Snd.se("ng"); S.miss++; fb.className="fb"; fb.textContent= k==="w2"?"座った目の高さから、二階の窓までまっすぐ線を引いてみる。途中に何がある？":"座ったままで、二つとも見えるだろうか。目の高さを座る位置に戻して確かめる。"; return; }
+      Snd.se("ok"); q.dataset.ok=1; b.classList.add("on"); fb.className="fb ok"; fb.textContent="二階の窓は、店先の看板の庇に隠れる。座ったキヨに見えるのは、屋根裏の窓だけだ。";
+      nextBtn(wrap,"帳場から下りる",done);
+    };
+    q.appendChild(b);
+  });
+  q.appendChild(fb); wrap.appendChild(q);
+  stage.appendChild(wrap);
+  function paint(){
+    if(!cv.isConnected) return;
+    const {ctx,W,H}=setupCanvas(cv);
+    const mx=(W-110)/4.9, my=(H-30)/7.3, ox=12+mx*0.35, gy=H-14, m=Math.min(mx,my);
+    const X=x=>ox+x*mx, Y=h=>gy-h*my;
+    rect(ctx,"#EEE9DE",0,0,W,H);
+    rect(ctx,"#C9BFAE",0,gy,W,H-gy);
+    // 煙草屋(帳場は一段高い)
+    rect(ctx,"#B8A890",X(-0.3),Y(3.0),X(1.0)-X(-0.3),gy-Y(3.0)); rect(ctx,"#EEE9DE",X(0.05),Y(2.6),X(1.0)-X(0.05),Y(0.55)-Y(2.6));
+    rect(ctx,"#9A8466",X(-0.3),Y(0.5),X(0.8)-X(-0.3),Y(0)-Y(0.5));
+    ctx.fillStyle="#5A4636"; ctx.font="500 11px "+UIF(); ctx.textAlign="left"; ctx.fillText("煙草屋",X(-0.25),Y(2.75));
+    // 洋装店
+    rect(ctx,"#CDBFA6",X(WIN.face),Y(7.2),X(5.2)-X(WIN.face),gy-Y(7.2));
+    rect(ctx,"#3E3632",X(WIN.eave.x0),Y(WIN.eave.h)-3,X(WIN.eave.x1)-X(WIN.eave.x0),6);
+    rect(ctx,"#EDE6D4",X(WIN.eave.x0+0.3),Y(WIN.eave.h+0.55),X(WIN.eave.x1)-X(WIN.eave.x0+0.3),Y(WIN.eave.h)-Y(WIN.eave.h+0.55)-3);
+    ctx.fillStyle="#3A2C26"; ctx.textAlign="center"; ctx.font="700 11px "+SERIF(); ctx.fillText("柚木洋装店",(X(WIN.eave.x0+0.3)+X(WIN.eave.x1))/2,Y(WIN.eave.h+0.17));
+    const winRect=(r,lit,lb)=>{ rect(ctx,lit?"#F1D9A2":"#D9D3C4",X(WIN.face)-4,Y(r[1]),8,Y(r[0])-Y(r[1])); ctx.fillStyle="#5A4636"; ctx.font="500 11px "+UIF(); ctx.textAlign="left"; ctx.fillText(lb,X(WIN.face)+8,(Y(r[0])+Y(r[1]))/2+4); };
+    winRect(WIN.w2,false,"二階の窓"); winRect(WIN.w3,true,"屋根裏の窓");
+    // 目と視線
+    const e=EYES[eye];
+    ctx.fillStyle="#1F2C35"; ctx.beginPath(); ctx.arc(X(e.x),Y(e.h),5,0,Math.PI*2); ctx.fill();
+    ctx.font="500 11px "+UIF(); ctx.textAlign="left"; ctx.fillText(eye==="sit"?"キヨの目(座る)":"立ち上がった目",X(e.x)-4,Y(e.h)+16);
+    [WIN.w2,WIN.w3].forEach(r=>{
+      const sp=visibleSpan(e,r[0],r[1]);
+      [r[0],r[1]].forEach(v=>{
+        const t=(WIN.eave.h-e.h)/(v-e.h), xc=e.x+t*(WIN.face-e.x), blocked=v>e.h&&xc>=WIN.eave.x0&&xc<=WIN.eave.x1;
+        ctx.setLineDash(blocked?[4,4]:[]); ctx.strokeStyle=blocked?"#A2382B":"#9A6A1F"; ctx.lineWidth=1.4;
+        ctx.beginPath(); ctx.moveTo(X(e.x),Y(e.h)); ctx.lineTo(blocked?X(xc):X(WIN.face),blocked?Y(WIN.eave.h):Y(v)); ctx.stroke();
+      });
+      ctx.setLineDash([]);
+      if(sp){ ctx.fillStyle="rgba(154,106,31,0.35)"; ctx.fillRect(X(WIN.face)-7,Y(sp[1]),14,Y(sp[0])-Y(sp[1])); }
+    });
+    ctx.fillStyle="#5A646C"; ctx.font="500 10px "+UIF(); ctx.textAlign="right"; ctx.fillText("実線: 見える　点線: 庇にさえぎられる",W-8,14);
+  }
+  requestAnimationFrame(paint); wrap._paint=paint;
+}
+
+/* ---------- 帳簿の突き合わせ ---------- */
+const LEDGER_LINES=[
+  "九月二十五日　月賦　四千円　権藤氏ニ渡ス　控 第二十六号",
+  "十月三日　　　絹裏地　三反　千二百円",
+  "十月二十五日　月賦　四千円　権藤氏ニ渡ス　控 第二十七号",
+  "十一月二十五日　月賦　四千円　権藤氏ニ渡ス　控 第二十八号",
+  "十二月十日　　お歳暮　海苔　キヨ様ヘ",
+  "十二月二十五日　月賦　四千円　権藤氏ニ渡ス　控 第二十九号",
+  "一月二十五日　月賦　四千円　権藤氏ニ渡ス　控 第三十号　完済",
+];
+const LEDGER_ROWS=[{n:"第二十六回",m:"九月",a:"26"},{n:"第二十七回",m:"十月",a:"27"},{n:"第二十八回",m:"十一月",a:"28"},{n:"第二十九回",m:"十二月",a:"29"},{n:"第三十回",m:"一月",a:"30"}];
+function miniLedger(done){
+  const wrap=el("div","mini");
+  wrap.appendChild(el("p","lead","権藤が「未払い」とした五回分を、屋根裏の帳簿と突き合わせる。それぞれの回の受取の控えは、何号か。"));
+  const lg=el("div","q ledger"); lg.appendChild(el("p",null,"<b>屋根裏の帳簿</b>(九月から一月の抜き書き)"));
+  LEDGER_LINES.forEach(l=>lg.appendChild(el("p","ll",esc(l))));
+  wrap.appendChild(lg);
+  const tbl=el("table","tbl");
+  tbl.innerHTML='<thead><tr><th>月賦</th><th>権藤の請求書</th><th>店の帳簿</th><th>屋根裏の帳簿</th></tr></thead>';
+  const tb=el("tbody"); tbl.appendChild(tb);
+  const cells=[];
+  LEDGER_ROWS.forEach(r=>{ const tr=el("tr",null,'<td>'+r.n+'('+r.m+')</td><td class="bad">未払い</td><td class="mute">空白</td><td class="pend">?</td>'); tb.appendChild(tr); cells.push(tr.lastChild); });
+  wrap.appendChild(tbl);
+  const fb=el("p","fb",""); let i=0;
+  const q=el("div","q"); const lab=el("p",null,""); q.appendChild(lab);
+  const seg=el("div","seg times");
+  const opts=["26","27","28","29","30","なし"];
+  function ask(){ lab.innerHTML=esc(LEDGER_ROWS[i].n+"("+LEDGER_ROWS[i].m+"二十五日)の控えは"); }
+  opts.forEach(o=>{ const b=el("button",null,o==="なし"?"記載なし":"第"+o+"号"); b.type="button";
+    b.onclick=()=>{
+      if(i>=LEDGER_ROWS.length) return;
+      const r=LEDGER_ROWS[i];
+      if(o!==r.a){ Snd.se("ng"); S.miss++; fb.className="fb"; fb.textContent="帳簿の日付と、控えの番号をもう一度見比べる。"; return; }
+      Snd.se("ok"); cells[i].textContent="支払済　控 第"+o+"号"; cells[i].className="okc"; fb.textContent=""; i++;
+      if(i===LEDGER_ROWS.length){ q.remove(); wrap.appendChild(el("p","fb ok","五回とも、支払いと控えの番号が残っている。月賦は一月二十五日に完済していた。")); nextBtn(wrap,"帳簿の最後の頁をめくる",done); }
+      else ask();
+    }; seg.appendChild(b); });
+  ask(); q.append(seg,fb); wrap.appendChild(q);
+  stage.appendChild(wrap);
+}
+
+/* ---------- 採寸表と背広 ---------- */
+const MEAS=[
+  {k:"shoulder",n:"肩幅",sheet:"一尺四寸五分",suit:"一尺四寸五分"},
+  {k:"length",n:"着丈",sheet:"二尺四寸",suit:"二尺四寸"},
+  {k:"right",n:"右の袖丈",sheet:"一尺九寸五分",suit:"一尺九寸五分"},
+  {k:"left",n:"左の袖丈",sheet:"一尺八寸五分(左一寸詰メ)",suit:"一尺八寸五分"}
+];
+function miniMeasure(done){
+  const wrap=el("div","mini");
+  wrap.appendChild(el("p","lead","ミシンの上の背広に巻尺を当てて、採寸表と比べる。測る場所を選ぶ。"));
+  const view=el("div","viewer tailor"); const cv=el("canvas"); view.appendChild(cv); wrap.appendChild(view);
+  const tbl=el("table","tbl"); tbl.innerHTML='<thead><tr><th>場所</th><th>採寸表</th><th>背広</th></tr></thead>';
+  const tb=el("tbody"); tbl.appendChild(tb); const tds={};
+  MEAS.forEach(m=>{ const tr=el("tr",null,'<td>'+m.n+'</td><td>'+esc(m.sheet)+'</td><td class="pend">―</td>'); tb.appendChild(tr); tds[m.k]=tr.lastChild; });
+  const ctl=el("div","ctl"); const got=new Set(); let cur=null;
+  MEAS.forEach(m=>{ const b=el("button",null,esc(m.n)); b.onclick=()=>{ cur=m.k; got.add(m.k); tds[m.k].textContent=m.suit; tds[m.k].className="okc"; Snd.se("tick"); paint(); if(got.size===MEAS.length&&!wrap.querySelector(".q")) quiz(); }; ctl.appendChild(b); });
+  wrap.append(ctl,tbl);
+  stage.appendChild(wrap);
+  function quiz(){
+    const q=el("div","q"); q.appendChild(el("p",null,"この背広は、誰の体に合わせて縫われているか。"));
+    const fb=el("p","fb","");
+    [["oki","今この家にいる、兄を名乗る男の体"],["sho","出征の前の日の、正一の体"],["tae","タエが思い描いた、帰ってきた息子の体"]].forEach(([k,lb])=>{
+      const b=el("button","opt",esc(lb)); b.type="button";
+      b.onclick=()=>{ if(q.dataset.ok) return;
+        if(k!=="sho"){ Snd.se("ng"); S.miss++; fb.className="fb"; fb.textContent= k==="oki"?"あの男は、湯呑みを持つとき、両腕を同じように伸ばしていた。":"数字はすべて、採寸表の日付の日に測ったものと一致している。"; return; }
+        Snd.se("ok"); q.dataset.ok=1; b.classList.add("on"); fb.className="fb ok"; fb.textContent="寸法は、出征前日の採寸表と一分の狂いもない。左の袖も、一寸短く。";
+        nextBtn(wrap,"屋根裏へ戻る",done); };
+      q.appendChild(b); });
+    q.appendChild(fb); wrap.appendChild(q);
+  }
+  function paint(){
+    if(!cv.isConnected) return;
+    const {ctx,W,H}=setupCanvas(cv);
+    rect(ctx,"#2A2E3E",0,0,W,H);
+    const s=Math.min(H*0.92,W*0.7), x=W/2, y=H*0.05;
+    suit(ctx,x,y,s,"#6E6E78",true);
+    ctx.strokeStyle="rgba(255,255,255,0.18)"; ctx.setLineDash([3,3]); ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(x,y+s*0.3); ctx.lineTo(x,y+s*0.75); ctx.stroke(); ctx.setLineDash([]);
+    const tape=(x1,y1,x2,y2,lb)=>{ ctx.strokeStyle="#E6C27A"; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+      ctx.fillStyle="#E6C27A"; ctx.font="700 12px "+UIF(); ctx.textAlign="center"; ctx.fillText(lb,(x1+x2)/2+(x2===x1?28:0),(y1+y2)/2-8); };
+    const m=MEAS.find(q=>q.k===cur);
+    if(cur==="shoulder") tape(x-s*0.3,y+s*0.06,x+s*0.3,y+s*0.06,m.suit);
+    if(cur==="length") tape(x+s*0.2,y+s*0.02,x+s*0.2,y+s*0.75,m.suit);
+    if(cur==="right") tape(x-s*0.3,y+s*0.06,x-s*0.42,y+s*0.68,m.suit);
+    if(cur==="left") tape(x+s*0.3,y+s*0.06,x+s*0.42,y+s*0.58,m.suit);
+    if(!cur){ ctx.fillStyle="rgba(238,232,222,0.7)"; ctx.font="500 12px "+UIF(); ctx.textAlign="center"; ctx.fillText("測る場所を選ぶ",W/2,H-10); }
+  }
+  requestAnimationFrame(paint); wrap._paint=paint;
+}
+
+/* ============================================================
+   風景プレート (下町の路地と洋装店。時刻で空と明かりが変わる)
+   ============================================================ */
+function timeOf(str){ const m=(str||"").match(/(\d{1,2}):(\d{2})/); return m?(+m[1])+(+m[2])/60:15; }
+/* 0:昼 1:夕 2:夜 3:朝 */
+function skyOf(h){ if(h>=19||h<5) return 2; if(h>=16.5) return 1; if(h<8) return 3; return 0; }
+function rect(ctx,c,x,y,w,h){ ctx.fillStyle=c; ctx.fillRect(x,y,w,h); }
+function glow(ctx,x,y,r,c,a){ const g=ctx.createRadialGradient(x,y,1,x,y,r); g.addColorStop(0,"rgba("+c+","+a+")"); g.addColorStop(1,"rgba("+c+",0)"); ctx.fillStyle=g; ctx.fillRect(x-r,y-r,r*2,r*2); }
+function shoji(ctx,x,y,w,h,lit,frame){
+  rect(ctx,lit?"#F1D9A2":"#D9D3C4",x,y,w,h);
+  ctx.strokeStyle=frame||"#6A5845"; ctx.lineWidth=1;
+  for(let i=1;i<3;i++){ ctx.beginPath(); ctx.moveTo(x+w*i/3,y); ctx.lineTo(x+w*i/3,y+h); ctx.stroke(); }
+  for(let j=1;j<3;j++){ ctx.beginPath(); ctx.moveTo(x,y+h*j/3); ctx.lineTo(x+w,y+h*j/3); ctx.stroke(); }
+  ctx.lineWidth=2; ctx.strokeRect(x,y,w,h);
+}
+/* 糸車を回す女の影 */
+function spinnerShadow(ctx,x,y,s,col){
+  ctx.fillStyle=col;
+  ctx.beginPath(); ctx.arc(x,y-s*0.62,s*0.11,0,Math.PI*2); ctx.fill();                 // 頭
+  ctx.beginPath(); ctx.arc(x-s*0.09,y-s*0.68,s*0.06,0,Math.PI*2); ctx.fill();          // 髷
+  ctx.beginPath(); ctx.moveTo(x-s*0.16,y); ctx.quadraticCurveTo(x-s*0.2,y-s*0.42,x,y-s*0.5); ctx.quadraticCurveTo(x+s*0.17,y-s*0.42,x+s*0.2,y); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle=col; ctx.lineWidth=Math.max(1.5,s*0.04);
+  ctx.beginPath(); ctx.moveTo(x+s*0.1,y-s*0.38); ctx.lineTo(x+s*0.42,y-s*0.3); ctx.stroke();          // 回す手
+  ctx.beginPath(); ctx.moveTo(x-s*0.08,y-s*0.36); ctx.lineTo(x-s*0.45,y-s*0.5); ctx.stroke();         // 引く手
+  ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(x-s*0.45,y-s*0.5); ctx.lineTo(x-s*0.9,y-s*0.56); ctx.stroke(); // 糸
+  ctx.lineWidth=Math.max(1.5,s*0.035); ctx.beginPath(); ctx.arc(x+s*0.58,y-s*0.26,s*0.24,0,Math.PI*2); ctx.stroke();
+  for(let k=0;k<6;k++){ const a=k*Math.PI/3; ctx.beginPath(); ctx.moveTo(x+s*0.58,y-s*0.26); ctx.lineTo(x+s*0.58+Math.cos(a)*s*0.24,y-s*0.26+Math.sin(a)*s*0.24); ctx.stroke(); }
+}
+function spinningWheel(ctx,cx,cy,r,col){
+  ctx.strokeStyle=col; ctx.fillStyle=col; ctx.lineWidth=Math.max(2,r*0.08);
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.stroke();
+  ctx.lineWidth=Math.max(1,r*0.03);
+  for(let k=0;k<8;k++){ const a=k*Math.PI/4; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r); ctx.stroke(); }
+  ctx.lineWidth=Math.max(2,r*0.07);
+  ctx.beginPath(); ctx.moveTo(cx-r*0.2,cy); ctx.lineTo(cx-r*0.55,cy+r*1.45); ctx.moveTo(cx+r*0.2,cy); ctx.lineTo(cx+r*0.55,cy+r*1.45); ctx.stroke();
+  ctx.fillRect(cx-r*1.9,cy+r*1.35,r*2.8,r*0.16);
+  ctx.beginPath(); ctx.moveTo(cx-r*1.6,cy+r*1.35); ctx.lineTo(cx-r*1.6,cy+r*0.2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx-r*1.6,cy+r*0.15,r*0.14,0,Math.PI*2); ctx.fill();
+}
+function sewingMachine(ctx,x,y,s,night){
+  const body=night?"#0D0E14":"#141418";
+  // 脚と踏み板
+  ctx.strokeStyle=night?"#1A1C24":"#2A2A2E"; ctx.lineWidth=Math.max(2,s*0.04);
+  ctx.beginPath(); ctx.moveTo(x-s*0.6,y); ctx.lineTo(x-s*0.5,y+s*0.75); ctx.moveTo(x+s*0.6,y); ctx.lineTo(x+s*0.5,y+s*0.75); ctx.stroke();
+  ctx.beginPath(); ctx.arc(x+s*0.38,y+s*0.45,s*0.18,0,Math.PI*2); ctx.stroke();
+  rect(ctx,night?"#1A1C24":"#2E2A26",x-s*0.3,y+s*0.66,s*0.5,s*0.06);
+  // 台
+  rect(ctx,night?"#2A2620":"#6B4E32",x-s*0.7,y-s*0.06,s*1.4,s*0.08);
+  // 胴
+  ctx.fillStyle=body;
+  ctx.beginPath(); ctx.moveTo(x-s*0.45,y-s*0.06); ctx.lineTo(x-s*0.45,y-s*0.22); ctx.quadraticCurveTo(x-s*0.4,y-s*0.42,x-s*0.1,y-s*0.42); ctx.lineTo(x+s*0.32,y-s*0.42);
+  ctx.quadraticCurveTo(x+s*0.42,y-s*0.42,x+s*0.42,y-s*0.3); ctx.lineTo(x+s*0.42,y-s*0.06); ctx.lineTo(x+s*0.3,y-s*0.06); ctx.lineTo(x+s*0.3,y-s*0.26); ctx.lineTo(x-s*0.32,y-s*0.26); ctx.lineTo(x-s*0.32,y-s*0.06); ctx.closePath(); ctx.fill();
+  ctx.fillRect(x-s*0.46,y-s*0.2,s*0.08,s*0.14);
+  ctx.strokeStyle=night?"#6E5E38":"#B8954A"; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(x-s*0.2,y-s*0.36); ctx.quadraticCurveTo(x,y-s*0.4,x+s*0.2,y-s*0.35); ctx.stroke();
+  ctx.beginPath(); ctx.arc(x+s*0.5,y-s*0.24,s*0.08,0,Math.PI*2); ctx.stroke();
+}
+function suit(ctx,x,y,s,col,leftShort){
+  ctx.fillStyle=col;
+  ctx.beginPath(); ctx.moveTo(x-s*0.22,y); ctx.lineTo(x-s*0.3,y+s*0.06); ctx.lineTo(x-s*0.27,y+s*0.75); ctx.lineTo(x+s*0.27,y+s*0.75); ctx.lineTo(x+s*0.3,y+s*0.06); ctx.lineTo(x+s*0.22,y); ctx.lineTo(x+s*0.06,y+s*0.02); ctx.lineTo(x,y+s*0.3); ctx.lineTo(x-s*0.06,y+s*0.02); ctx.closePath(); ctx.fill();
+  // 袖(左は短い)
+  /* 正面から見ているので、着る人の左袖は画面の右側 */
+  ctx.beginPath(); ctx.moveTo(x-s*0.3,y+s*0.06); ctx.lineTo(x-s*0.42,y+s*0.68); ctx.lineTo(x-s*0.32,y+s*0.7); ctx.lineTo(x-s*0.26,y+s*0.2); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(x+s*0.3,y+s*0.06); ctx.lineTo(x+s*0.42,y+s*(leftShort?0.58:0.68)); ctx.lineTo(x+s*0.32,y+s*(leftShort?0.6:0.7)); ctx.lineTo(x+s*0.26,y+s*0.2); ctx.closePath(); ctx.fill();
+}
+
+function drawPlate(kind,hour){
+  const cv=$("#plate"); const {ctx,W,H}=setupCanvas(cv);
+  const sk=skyOf(hour), night=sk===2;
+  if(kind==="street") return plateStreet(ctx,W,H,sk,hour);
+  if(kind==="shop") return plateShop(ctx,W,H,sk);
+  if(kind==="work"||kind==="worknight") return plateWork(ctx,W,H,kind==="worknight");
+  if(kind==="attic"||kind==="atticnight") return plateAttic(ctx,W,H,kind==="atticnight");
+  if(kind==="go") return plateGo(ctx,W,H);
+  if(kind==="office58") return plateOffice(ctx,W,H,true,night);
+  return plateOffice(ctx,W,H,false,night);
+}
+
+/* 路地: 左に煙草屋、右に継ぎ足しの洋装店 */
+function plateStreet(ctx,W,H,sk,hour){
+  const night=sk===2, eve=sk===1;
+  const g=ctx.createLinearGradient(0,0,0,H);
+  if(night){ g.addColorStop(0,"#141824"); g.addColorStop(1,"#262A38"); }
+  else if(eve){ g.addColorStop(0,"#7E6A78"); g.addColorStop(1,"#D9A27C"); }
+  else if(sk===3){ g.addColorStop(0,"#C9CDD0"); g.addColorStop(1,"#E9E2D4"); }
+  else { g.addColorStop(0,"#B9C6CC"); g.addColorStop(1,"#E5E2D8"); }
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  const g0=H*0.86;
+  // 奥の家並み
+  const far=night?"#1E2230":(eve?"#7A6268":"#9EA3A2");
+  for(let i=0;i<7;i++){ const x=W*(0.36+i*0.045), h=H*(0.28+((i*0.37)%1)*0.14); rect(ctx,far,x,g0-h,W*0.05,h);
+    ctx.fillStyle=night?"#141824":(eve?"#5E4C52":"#7F8584"); ctx.beginPath(); ctx.moveTo(x-W*0.006,g0-h); ctx.lineTo(x+W*0.025,g0-h-H*0.05); ctx.lineTo(x+W*0.056,g0-h); ctx.fill();
+    if(night&&i%2===0) rect(ctx,"#C9A060",x+W*0.015,g0-h+H*0.06,W*0.012,H*0.03); }
+  // 電柱と電線
+  ctx.strokeStyle=night?"#0B0D14":"#3E3A36"; ctx.lineWidth=Math.max(2,W*0.006);
+  ctx.beginPath(); ctx.moveTo(W*0.5,g0); ctx.lineTo(W*0.5,H*0.05); ctx.stroke();
+  ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(W*0.46,H*0.12); ctx.lineTo(W*0.54,H*0.12); ctx.stroke();
+  [[0,0.18],[0,0.24]].forEach(([a,b])=>{ ctx.beginPath(); ctx.moveTo(0,H*b+H*0.04); ctx.quadraticCurveTo(W*0.25,H*b+H*0.1,W*0.5,H*0.12); ctx.quadraticCurveTo(W*0.75,H*b+H*0.1,W,H*b); ctx.stroke(); });
+  // 路地
+  rect(ctx,night?"#1A1A20":(eve?"#8C7464":"#B5ABA0"),0,g0,W,H-g0);
+  // 煙草屋(左)
+  const tx=0, tw=W*0.32, th=H*0.5;
+  rect(ctx,night?"#22201E":"#6E5A48",tx,g0-th,tw,th);
+  ctx.fillStyle=night?"#141214":"#3A3230"; ctx.beginPath(); ctx.moveTo(tx,g0-th); ctx.lineTo(tx+tw+W*0.02,g0-th); ctx.lineTo(tx+tw-W*0.01,g0-th-H*0.1); ctx.lineTo(tx,g0-th-H*0.1); ctx.fill();
+  rect(ctx,night?"#2C2622":"#4E4038",tx,g0-th*0.62,tw+W*0.03,H*0.03);   // 庇
+  const shopLit=night||eve;
+  rect(ctx,shopLit?"#E2B66E":"#3A322C",tx+W*0.02,g0-th*0.58,tw-W*0.04,th*0.58);
+  if(shopLit) glow(ctx,tx+tw*0.5,g0-th*0.3,H*0.4,"240,190,110",night?0.35:0.2);
+  // キヨ(帳場に座る影)
+  ctx.fillStyle=shopLit?"#5A3E26":"#1C1714"; ctx.beginPath(); ctx.arc(tx+tw*0.3,g0-th*0.36,H*0.035,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(tx+tw*0.3,g0-th*0.2,H*0.06,H*0.07,0,0,Math.PI*2); ctx.fill();
+  rect(ctx,night?"#3A2420":"#9C3B32",tx+tw*0.62,g0-th*0.58,W*0.05,th*0.36);    // たばこの看板
+  ctx.fillStyle="#F4EEDE"; ctx.font="700 "+Math.max(8,H*0.05)+"px "+UIF(); ctx.textAlign="center";
+  ["た","ば","こ"].forEach((c,i)=>ctx.fillText(c,tx+tw*0.62+W*0.025,g0-th*0.48+i*H*0.06));
+  rect(ctx,night?"#2A2420":"#8E7A62",tx+W*0.02,g0-H*0.08,tw-W*0.04,H*0.08);    // ショーケース
+  // 洋装店(右): 一階・二階・屋根裏
+  const sx=W*0.6, sw=W*0.3;
+  const f1=g0-H*0.24, f2=f1-H*0.22, f3=f2-H*0.18;
+  const wall=night?"#2A2826":(eve?"#8A7462":"#B4A48E");
+  rect(ctx,wall,sx,f1,sw,g0-f1); rect(ctx,wall,sx,f2,sw,f1-f2);
+  rect(ctx,night?"#25221F":(eve?"#7C6656":"#A39480"),sx+sw*0.12,f3,sw*0.76,f2-f3);   // 継ぎ足しの屋根裏
+  ctx.fillStyle=night?"#101014":"#3A3634"; ctx.beginPath(); ctx.moveTo(sx+sw*0.04,f3); ctx.lineTo(sx+sw*0.5,f3-H*0.08); ctx.lineTo(sx+sw*0.96,f3); ctx.fill();
+  ctx.fillRect(sx-W*0.01,f2-H*0.02,sw+W*0.02,H*0.025);
+  // 店先のガラス戸
+  for(let i=0;i<4;i++) rect(ctx,night?"#3A3A44":(eve?"#C9A27A":"#C9D2D4"),sx+sw*(0.04+i*0.24),f1+H*0.05,sw*0.2,g0-f1-H*0.06);
+  // 看板を載せた庇
+  rect(ctx,night?"#141414":"#3E3632",sx-W*0.04,f1-H*0.005,sw+W*0.05,H*0.035);
+  rect(ctx,night?"#2E2A28":"#EDE6D4",sx+sw*0.1,f1-H*0.085,sw*0.8,H*0.08);
+  ctx.fillStyle=night?"#6A6258":"#3A2C26"; ctx.font="700 "+Math.max(8,H*0.055)+"px "+getComputedStyle(document.body).getPropertyValue("--serif"); ctx.textAlign="center";
+  ctx.fillText("柚木洋装店",sx+sw*0.5,f1-H*0.028);
+  // 二階の窓
+  shoji(ctx,sx+sw*0.2,f2+H*0.035,sw*0.6,H*0.13,false,night?"#1A1612":"#6A5845");
+  // 屋根裏の窓
+  const shadow=night&&(hour>=21||hour<4);
+  const ax=sx+sw*0.38, ay=f3+H*0.03, aw=sw*0.24, ah=H*0.11;
+  shoji(ctx,ax,ay,aw,ah,shadow,night?"#1A1612":"#6A5845");
+  if(shadow){ glow(ctx,ax+aw/2,ay+ah/2,H*0.3,"240,200,130",0.35);
+    ctx.save(); ctx.beginPath(); ctx.rect(ax,ay,aw,ah); ctx.clip(); spinnerShadow(ctx,ax+aw*0.42,ay+ah*0.98,ah*0.95,"rgba(60,40,24,0.75)"); ctx.restore(); }
+  if(eve){ ctx.fillStyle="rgba(230,120,70,0.25)"; ctx.fillRect(ax,ay,aw,ah); }
+  if(night){ ctx.fillStyle="rgba(14,16,30,0.18)"; ctx.fillRect(0,0,W,H); }
+}
+
+function plateShop(ctx,W,H,sk){
+  const dark=sk===2;
+  rect(ctx,dark?"#2A2420":"#CDBFA8",0,0,W,H);
+  const g0=H*0.8;
+  rect(ctx,dark?"#211C18":"#9C8466",0,g0,W,H-g0);
+  ctx.strokeStyle=dark?"#2E2722":"#8A7458"; ctx.lineWidth=1; for(let x=0;x<W;x+=W*0.06){ ctx.beginPath(); ctx.moveTo(x,g0); ctx.lineTo(x-W*0.03,H); ctx.stroke(); }
+  // 反物の棚
+  rect(ctx,dark?"#3A2E26":"#7A5E44",W*0.03,H*0.1,W*0.26,g0-H*0.1);
+  const cols=["#3E4E6A","#8C3A34","#C9B48A","#5A6A4A","#2E2E36","#B07A4A","#6A5A7A","#D8CFC0"];
+  for(let r=0;r<4;r++) for(let c=0;c<5;c++){ const k=(r*5+c)%cols.length; rect(ctx,dark?"#2A2420":cols[k],W*(0.045+c*0.048),H*(0.14+r*0.15),W*0.04,H*0.12); }
+  // ガラス戸の光
+  const gx=W*0.36, gw=W*0.28;
+  rect(ctx,dark?"#2E3242":"#E8E4D6",gx,H*0.12,gw,g0-H*0.12);
+  ctx.strokeStyle=dark?"#1A1612":"#6A5845"; ctx.lineWidth=2; ctx.strokeRect(gx,H*0.12,gw,g0-H*0.12);
+  for(let i=1;i<4;i++){ ctx.beginPath(); ctx.moveTo(gx+gw*i/4,H*0.12); ctx.lineTo(gx+gw*i/4,g0); ctx.stroke(); }
+  // トルソー
+  [[0.42,1],[0.56,0]].forEach(([u,k])=>{ const x=W*u, y=g0;
+    ctx.fillStyle=dark?"#0E0C0A":"#4A3A2E"; ctx.fillRect(x-1,y-H*0.18,2,H*0.18); ctx.fillRect(x-W*0.02,y-2,W*0.04,2);
+    ctx.fillStyle=dark?"#1A1612":(k?"#E9E1CF":"#3C4660"); ctx.beginPath(); ctx.moveTo(x-W*0.03,y-H*0.56); ctx.quadraticCurveTo(x-W*0.04,y-H*0.4,x-W*0.025,y-H*0.18); ctx.lineTo(x+W*0.025,y-H*0.18); ctx.quadraticCurveTo(x+W*0.04,y-H*0.4,x+W*0.03,y-H*0.56); ctx.closePath(); ctx.fill();
+    rect(ctx,dark?"#0E0C0A":"#4A3A2E",x-W*0.005,y-H*0.62,W*0.01,H*0.06); });
+  // 帳場と算盤
+  rect(ctx,dark?"#3A2C20":"#6B4E32",W*0.7,g0-H*0.22,W*0.22,H*0.22);
+  rect(ctx,dark?"#2A2018":"#3E2C1E",W*0.72,g0-H*0.26,W*0.12,H*0.04);
+  ctx.fillStyle=dark?"#8A6A3A":"#C9A060"; for(let i=0;i<9;i++){ ctx.beginPath(); ctx.arc(W*(0.73+i*0.012),g0-H*0.24,1.6,0,Math.PI*2); ctx.fill(); }
+  // 階段
+  ctx.fillStyle=dark?"#1E1814":"#5C4632";
+  for(let i=0;i<7;i++) ctx.fillRect(W*(0.94-i*0.008),g0-H*(0.1+i*0.1),W*0.06+i*W*0.008,H*0.02);
+  if(dark){ glow(ctx,W*0.78,g0-H*0.2,H*0.6,"230,170,90",0.25); }
+}
+
+function plateWork(ctx,W,H,night){
+  rect(ctx,night?"#141826":"#D3C6AE",0,0,W,H);
+  const g0=H*0.82;
+  rect(ctx,night?"#10131E":"#A88E6A",0,g0,W,H-g0);
+  ctx.strokeStyle=night?"#1A1E2A":"#957C5A"; ctx.lineWidth=1; for(let y=g0;y<H;y+=H*0.05){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  // 窓
+  const wx=W*0.08, wy=H*0.12, ww=W*0.3, wh=H*0.48;
+  if(night){ rect(ctx,"#2A3450",wx,wy,ww,wh); glow(ctx,wx+ww*0.7,wy+wh*0.3,H*0.25,"220,230,255",0.5); rect(ctx,"#E8ECF4",wx+ww*0.68,wy+wh*0.22,W*0.012,W*0.012); }
+  else shoji(ctx,wx,wy,ww,wh,true);
+  ctx.strokeStyle=night?"#0A0C14":"#6A5845"; ctx.lineWidth=3; ctx.strokeRect(wx,wy,ww,wh);
+  // 月明かりの差しこみ
+  if(night){ ctx.fillStyle="rgba(170,190,240,0.08)"; ctx.beginPath(); ctx.moveTo(wx,wy+wh); ctx.lineTo(wx+ww,wy+wh); ctx.lineTo(W*0.62,H); ctx.lineTo(W*0.12,H); ctx.fill(); }
+  // ミシン
+  sewingMachine(ctx,W*0.5,g0-H*0.36,H*0.5,night);
+  // 衣桁と背広
+  ctx.strokeStyle=night?"#2A2420":"#5C4632"; ctx.lineWidth=Math.max(2,W*0.005);
+  ctx.beginPath(); ctx.moveTo(W*0.74,g0); ctx.lineTo(W*0.74,H*0.14); ctx.moveTo(W*0.92,g0); ctx.lineTo(W*0.92,H*0.14); ctx.moveTo(W*0.7,H*0.16); ctx.lineTo(W*0.96,H*0.16); ctx.stroke();
+  if(!night) suit(ctx,W*0.83,H*0.2,H*0.6,"#6E6E70",true);
+  else { ctx.fillStyle="#3E4058"; ctx.save(); ctx.translate(W*0.5,g0-H*0.43); ctx.scale(1,0.35); suit(ctx,0,-H*0.2,H*0.42,"#3E4058",true); ctx.restore(); }
+  // 天井の上がり口
+  rect(ctx,night?"#0C0E16":"#8A7458",W*0.6,0,W*0.12,H*0.05);
+  if(night){ rect(ctx,"#E6C27A",W*0.62,H*0.045,W*0.08,H*0.008); glow(ctx,W*0.66,H*0.05,H*0.2,"240,200,120",0.25); }
+}
+
+function plateAttic(ctx,W,H,night){
+  rect(ctx,night?"#17120E":"#A89478",0,0,W,H);
+  // 梁と屋根の斜面
+  ctx.fillStyle=night?"#0E0B08":"#6E5A44";
+  ctx.beginPath(); ctx.moveTo(0,H*0.55); ctx.lineTo(W*0.5,0); ctx.lineTo(0,0); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(W,H*0.55); ctx.lineTo(W*0.5,0); ctx.lineTo(W,0); ctx.fill();
+  rect(ctx,night?"#22190F":"#5A4632",0,H*0.12,W,H*0.04);
+  const g0=H*0.84;
+  rect(ctx,night?"#120E0A":"#8A7254",0,g0,W,H-g0);
+  // 小さな窓(通りに向いた)
+  const wx=W*0.42, wy=H*0.22, ww=W*0.16, wh=H*0.36;
+  shoji(ctx,wx,wy,ww,wh,night,night?"#2A2018":"#5A4632");
+  // 長持と行李
+  rect(ctx,night?"#1E160E":"#5A402A",W*0.04,g0-H*0.2,W*0.16,H*0.2);
+  rect(ctx,night?"#241C12":"#9A8460",W*0.82,g0-H*0.14,W*0.13,H*0.14);
+  // 文机・行灯・算盤
+  rect(ctx,night?"#2A1E14":"#6B4E32",W*0.66,g0-H*0.12,W*0.12,H*0.04);
+  rect(ctx,night?"#2A1E14":"#6B4E32",W*0.67,g0-H*0.08,W*0.01,H*0.08); rect(ctx,night?"#2A1E14":"#6B4E32",W*0.76,g0-H*0.08,W*0.01,H*0.08);
+  rect(ctx,night?"#E8D6A8":"#E9E1CF",W*0.69,g0-H*0.15,W*0.05,H*0.03);
+  rect(ctx,night?"#F2D48E":"#D8CDB2",W*0.75,g0-H*0.3,W*0.03,H*0.18);
+  if(night) glow(ctx,W*0.765,g0-H*0.22,H*0.75,"242,200,120",0.42);
+  // 糸車
+  spinningWheel(ctx,W*0.3,g0-H*0.34,H*0.16,night?"#3A2A1A":"#4A3624");
+  if(night){
+    // 女の姿(糸車の前)
+    spinnerShadow(ctx,W*0.21,g0,H*0.5,"#1A1A2A");
+    ctx.save(); ctx.beginPath(); ctx.rect(wx,wy,ww,wh); ctx.clip(); spinnerShadow(ctx,wx+ww*0.46,wy+wh*0.98,wh*0.9,"rgba(70,48,28,0.55)"); ctx.restore();
+    ctx.strokeStyle="rgba(240,210,140,0.7)"; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(W*0.165,g0-H*0.25); ctx.quadraticCurveTo(W*0.1,g0-H*0.2,W*0.06,g0-H*0.32); ctx.stroke();
+  }
+}
+
+function plateGo(ctx,W,H){
+  rect(ctx,"#BBAE96",0,0,W,H);
+  const g0=H*0.62;
+  rect(ctx,"#C9B98A",0,g0,W,H-g0);
+  ctx.strokeStyle="#A8976A"; ctx.lineWidth=1; for(let x=0;x<W;x+=W*0.1){ ctx.beginPath(); ctx.moveTo(x,g0); ctx.lineTo(x,H); ctx.stroke(); }
+  shoji(ctx,W*0.06,H*0.1,W*0.24,H*0.4,true);
+  for(let i=0;i<3;i++){ const x=W*(0.38+i*0.21), y=g0+H*0.12;
+    rect(ctx,"#D8B060",x,y,W*0.13,H*0.1); rect(ctx,"#8A6A32",x,y+H*0.1,W*0.13,H*0.05);
+    ctx.fillStyle="#1A1A1A"; for(let k=0;k<5;k++){ ctx.beginPath(); ctx.arc(x+W*(0.02+k*0.022),y+H*(0.03+(k%2)*0.04),2,0,Math.PI*2); ctx.fill(); }
+    ctx.fillStyle="#F4F0E6"; for(let k=0;k<4;k++){ ctx.beginPath(); ctx.arc(x+W*(0.03+k*0.025),y+H*(0.06-(k%2)*0.03),2,0,Math.PI*2); ctx.fill(); }
+    ctx.fillStyle="#3A3230"; ctx.beginPath(); ctx.arc(x+W*0.065,y-H*0.14,H*0.05,0,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.ellipse(x+W*0.065,y-H*0.02,W*0.035,H*0.1,0,0,Math.PI*2); ctx.fill(); }
+  ctx.fillStyle="rgba(230,226,214,0.35)"; for(let i=0;i<6;i++){ ctx.beginPath(); ctx.ellipse(W*(0.3+i*0.12),H*(0.2+(i%3)*0.08),W*0.08,H*0.05,0,0,Math.PI*2); ctx.fill(); }
+}
+
+/* 事務所。昔(office58)は二つ目の机が空いていて、棚もほとんど空 */
+function plateOffice(ctx,W,H,old,night){
+  rect(ctx,old?"#CFC8B8":"#C9CBC6",0,0,W,H);
+  const g0=H*0.7, wx=W*0.56, wy=H*0.1, ww=W*0.34, wh=H*0.44;
+  const g=ctx.createLinearGradient(0,wy,0,wy+wh);
+  if(night){ g.addColorStop(0,"#2C3449"); g.addColorStop(1,"#596075"); } else if(old){ g.addColorStop(0,"#B8C4C8"); g.addColorStop(1,"#E2DDCF"); } else { g.addColorStop(0,"#2C3449"); g.addColorStop(1,"#596075"); }
+  ctx.fillStyle=g; ctx.fillRect(wx,wy,ww,wh);
+  if(old&&!night){ ctx.fillStyle="#8E9294"; for(let i=0;i<5;i++) ctx.fillRect(wx+ww*(0.05+i*0.19),wy+wh*(0.55-((i*0.4)%0.3)),ww*0.15,wh*(0.45+((i*0.4)%0.3))); }
+  else { ctx.fillStyle="#EFD08A"; [[0.08,0.62],[0.2,0.7],[0.33,0.58],[0.52,0.74],[0.66,0.64],[0.8,0.7],[0.9,0.6]].forEach(([u,v])=>{ ctx.fillRect(wx+ww*u,wy+wh*v,Math.max(2,W*0.006),Math.max(2,H*0.02)); }); }
+  ctx.strokeStyle="#7E8282"; ctx.lineWidth=3; ctx.strokeRect(wx,wy,ww,wh); ctx.beginPath(); ctx.moveTo(wx+ww/2,wy); ctx.lineTo(wx+ww/2,wy+wh); ctx.stroke();
+  rect(ctx,old?"#A89E88":"#B0B2AC",0,g0,W,H-g0);
+  const lx=W*0.24;
+  if(!old||night){ const gl=ctx.createRadialGradient(lx,g0-H*0.16,2,lx,g0-H*0.16,H*0.55); gl.addColorStop(0,"rgba(246,214,160,0.75)"); gl.addColorStop(1,"rgba(246,214,160,0)"); ctx.fillStyle=gl; ctx.fillRect(0,0,W,H); }
+  // 机(手前の二つ目は空いた机)
+  ctx.fillStyle="#7C7A75"; ctx.fillRect(W*0.08,g0-H*0.14,W*0.34,H*0.03); ctx.fillRect(W*0.1,g0-H*0.11,W*0.015,H*0.11); ctx.fillRect(W*0.395,g0-H*0.11,W*0.015,H*0.11);
+  ctx.fillStyle=old?"#6E5E4A":"#7C7A75"; ctx.fillRect(W*0.44,g0+H*0.06,W*0.22,H*0.03); ctx.fillRect(W*0.455,g0+H*0.09,W*0.012,H*0.2); ctx.fillRect(W*0.64,g0+H*0.09,W*0.012,H*0.2);
+  if(old){
+    // 黒電話
+    ctx.fillStyle="#141414"; ctx.beginPath(); ctx.ellipse(W*0.33,g0-H*0.17,W*0.03,H*0.045,0,Math.PI,0); ctx.fill(); ctx.fillRect(W*0.3,g0-H*0.2,W*0.06,H*0.018);
+    ctx.fillStyle="#E8E0CC"; ctx.beginPath(); ctx.arc(W*0.33,g0-H*0.165,H*0.018,0,Math.PI*2); ctx.fill();
+    // 扉
+    rect(ctx,"#8A7A64",W*0.0,H*0.06,W*0.06,g0-H*0.06);
+  }else{
+    ctx.fillStyle="#7C7A75"; ctx.fillRect(lx-W*0.004,g0-H*0.32,W*0.008,H*0.18); ctx.beginPath(); ctx.moveTo(lx-W*0.03,g0-H*0.3); ctx.lineTo(lx+W*0.03,g0-H*0.3); ctx.lineTo(lx+W*0.018,g0-H*0.38); ctx.lineTo(lx-W*0.018,g0-H*0.38); ctx.closePath(); ctx.fill();
+    ctx.fillStyle="#EDEAE0"; ctx.fillRect(W*0.28,g0-H*0.155,W*0.08,H*0.015);
+    ctx.fillStyle="#3A3A3A"; ctx.fillRect(W*0.16,g0-H*0.165,W*0.04,H*0.025);
+  }
+  // 奥の棚(別架)
+  const sx=W*0.02, sw=W*0.14;
+  ctx.fillStyle=old?"#7A6E5C":"#8E8B84"; ctx.fillRect(sx+(old?W*0.06:0),H*0.12,sw,H*0.5);
+  const ox=old?W*0.06:0;
+  ctx.fillStyle="#C4B58F";
+  for(let i=0;i<3;i++){ const n=old?0:5; for(let j=0;j<n;j++) ctx.fillRect(sx+ox+W*(0.01+j*0.025),H*(0.15+i*0.15),W*0.016,H*0.11); }
+  if(old){ ctx.fillStyle="rgba(0,0,0,0)"; }
+  if(night&&old){ ctx.fillStyle="rgba(20,22,36,0.35)"; ctx.fillRect(0,0,W,H); }
+}
+
+/* ============================================================
+   手帳 / 履歴 / 合言葉
+   ============================================================ */
+let ovEl=null;
+function closeOv(){ if(ovEl){ ovEl.remove(); ovEl=null; } }
+function sheet(title){
+  closeOv(); const ov=el("div","ov"); const sh=el("div","sheet"); ov.appendChild(sh);
+  const x=el("button","x","閉じる"); x.onclick=closeOv; sh.appendChild(x);
+  sh.appendChild(el("h2",null,esc(title)));
+  ov.addEventListener("click",e=>{ if(e.target===ov) closeOv(); });
+  document.body.appendChild(ov); ovEl=ov; Snd.se("open"); x.focus(); return sh;
+}
+function openNote(onPick){
+  const sh=sheet(onPick?"つきつける証拠を選ぶ":"手帳");
+  const keys=EV_ORDER.filter(k=>S.ev.has(k));
+  if(!keys.length) sh.appendChild(el("p","empty","まだ何も記録していない。"));
+  keys.forEach(k=>{
+    const c=el("div","ev",'<h3><span>'+k.replace("E","No.")+'</span>'+esc(EVIDENCE[k].n)+'</h3><p>'+esc(EVIDENCE[k].d)+'</p>');
+    if(onPick){ const b=el("button","btn","これをつきつける"); b.onclick=()=>onPick(k); c.appendChild(b); }
+    sh.appendChild(c);
+  });
+}
+function openLog(){
+  const sh=sheet("履歴"); const w=el("div","log");
+  if(!logLines.length) w.appendChild(el("p","empty","まだ何もない。"));
+  logLines.slice(-120).forEach(l=>{ w.appendChild(el("p",null,(l.sp?'<b>'+esc(l.sp)+'</b>「'+esc(l.text)+'」':esc(l.text)))); });
+  sh.appendChild(w);
+  const x=sh.querySelector(".x"); x.classList.add("bottom"); sh.appendChild(x);
+  setTimeout(()=>{ sh.scrollTop=sh.scrollHeight; },0);
+}
+function showCode(c,msg){
+  if(!c) return;
+  const code=encode(c); const sh=sheet("合言葉");
+  sh.appendChild(el("p","note",esc(msg||"この場面のはじめから再開できます。タイトル画面の「つづきから」に入力してください。")));
+  const box=el("div","code",code); sh.appendChild(box);
+  const b=el("button","btn","コピーする");
+  b.onclick=()=>{
+    const sel=()=>{ const r=document.createRange(); r.selectNodeContents(box); const s=getSelection(); s.removeAllRanges(); s.addRange(r); };
+    try{ navigator.clipboard.writeText(code).then(()=>{ b.textContent="コピーしました"; },()=>{ sel(); b.textContent="選択しました。手動でコピーしてください"; }); }
+    catch(e){ sel(); b.textContent="選択しました。手動でコピーしてください"; }
+  };
+  sh.appendChild(b);
+  sh.appendChild(el("p","note","合言葉はこの端末やブラウザに保存されません。メモや写真で控えておけば、別の端末でも続きから遊べます。"));
+}
+function openSound(){
+  const sh=sheet("音の設定");
+  [["bgm","BGM"],["se","効果音"]].forEach(([k,lb])=>{
+    const w=el("div","vol"); const id="vol-"+k;
+    w.innerHTML='<label for="'+id+'">'+lb+'</label><input type="range" id="'+id+'" min="0" max="100" step="5" value="'+Math.round(Snd.vol[k]*100)+'"><span class="fr">'+Math.round(Snd.vol[k]*100)+'</span>';
+    const r=w.querySelector("input"), v=w.querySelector(".fr");
+    r.oninput=()=>{ Snd.init(); Snd.setVol(k,+r.value/100); v.textContent=r.value; };
+    if(k==="se") r.onchange=()=>Snd.se("get");
+    sh.appendChild(w);
+  });
+  const rb=el("button","btn sub","音を鳴らし直す");
+  rb.onclick=()=>{ Snd.restart(); if(inGame&&cur&&N[cur]) Snd.play(trackFor(N[cur],cur)); setTimeout(()=>{ Snd.se("get"); rb.textContent=Snd.state()==="running"?"鳴らし直しました":"もう一度押してください"; },300); };
+  sh.appendChild(rb);
+  sh.appendChild(el("p","note","BGMと効果音は、この画面の中で生成しています。0にすると鳴らなくなります。スリープなどで音が止まったら、画面のどこかを一度タップしてください。それでも鳴らないときは「音を鳴らし直す」を押してください。"));
+}
+$("#bSnd").onclick=openSound;
+$("#tSnd").onclick=openSound;
+$("#bNote").onclick=()=>openNote(null);
+$("#bLog").onclick=openLog;
+$("#bSave").onclick=()=>showCode(cp);
+
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"){ closeOv(); return; }
+  if(ovEl || !inGame) return;
+  if((e.key==="Enter"||e.key===" ") && waiter && !(e.target instanceof HTMLButtonElement) && !(e.target instanceof HTMLInputElement)){ e.preventDefault(); advance(); }
+});
+window.addEventListener("resize",()=>{ if(cur&&N[cur]) drawPlate(N[cur].plate,timeOf(nodeTime(N[cur]))); if(!$("#title").hidden) drawTitlePlate(); document.querySelectorAll(".mini").forEach(w=>{ if(w._paint) w._paint(); }); });
+
+/* ============================================================
+   タイトル
+   ============================================================ */
+function drawTitlePlate(){ drawPlate(cleared?"office":"street",cleared?17.5:22); }
+function start(state,node){
+  S.flags=state.flags; S.ev=state.ev; S.clock=state.clock; S.miss=state.miss;
+  logLines.length=0; lastCh=null; choiceCp=null;
+  $("#title").hidden=true; inGame=true;
+  enter(node);
+}
+function toTitle(){ run++; waiter=null; inGame=false; cur=null; Snd.play(cleared?"office":"night"); closeOv(); stage.innerHTML=""; $("#title").hidden=false; $("#tErr").textContent=""; setTitle(); drawTitlePlate(); }
+$("#tNew").onclick=()=>start({flags:new Set(),ev:new Set(),clock:0,miss:0},"p1");
+$("#tCont").onclick=()=>{
+  const r=decode($("#tCode").value);
+  if(r.err){ $("#tErr").textContent=r.err; return; }
+  start(r,r.node);
+};
+$("#tCode").addEventListener("keydown",e=>{ if(e.key==="Enter") $("#tCont").click(); });
+
+/* タイトル: 真エンドのあとは「キキーモラ ― 別架1号 File No.1001」になる。
+   初めて戻ったときだけ、Xの字がほどけて、1が縫い直される */
+let cleared=false, justCleared=false;
+try{ cleared=localStorage.getItem("bekka-x-clear")==="1"; }catch(e){}
+function markCleared(){ if(!cleared) justCleared=true; cleared=true; try{ localStorage.setItem("bekka-x-clear","1"); }catch(e){} }
+function kickHTML(a,b){ return '別架<span class="x" data-to="1">'+a+'</span>号　File No.100<span class="x" data-to="1">'+b+'</span>'; }
+function setTitle(){
+  const word=cleared?"キキーモラ":"女郎蜘蛛";
+  const kick=$("#kick");
+  if(cleared&&justCleared){
+    justCleared=false;
+    kick.innerHTML=kickHTML("X","X"); kick.setAttribute("aria-label","別架1号　File No.1001");
+    setTimeout(()=>{ kick.querySelectorAll(".x").forEach(x=>x.classList.add("ravel")); Snd.se("thread"); },700);
+    setTimeout(()=>{ kick.querySelectorAll(".x").forEach(x=>{ x.classList.remove("ravel"); x.textContent=x.dataset.to; x.classList.add("sewn"); }); Snd.se("sew"); },1900);
+  }else{
+    kick.innerHTML=cleared?kickHTML("1","1"):kickHTML("X","X");
+    kick.setAttribute("aria-label",cleared?"別架1号　File No.1001":"別架X号　File No.100X");
+  }
+  const logo=$("#logo"); logo.innerHTML=""; logo.setAttribute("aria-label",word);
+  [...word].forEach((ch,i)=>{ const s=document.createElement("span"); s.textContent=ch; s.setAttribute("aria-hidden","true");
+    s.addEventListener("click",()=>{ if(s.classList.contains("dangle")) return; s.classList.add("dangle"); Snd.se("thread"); setTimeout(()=>s.classList.remove("dangle"),3300); });
+    logo.appendChild(s); });
+  document.title=word;
+  $("#tsub").innerHTML = cleared
+    ? "家を守り、夜に糸を紡ぐものがいた。<br>帰る家をなくしても、帳簿は続いている。"
+    : "夜ごと、二階のミシンがひとりでに動く。<br>町の人は、あの家に女郎蜘蛛が棲んでいると言う。";
+}
+setTitle();
+drawTitlePlate();
+Snd.play(cleared?"office":"night");
+
+</script>
+</body></html>
